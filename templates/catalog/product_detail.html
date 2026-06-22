@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} — Kılağuz Elektrik ve Yapı Market{% endblock %}
+
+{% block content %}
+<div class="container container--narrow-detail">
+  <nav class="breadcrumb" aria-label="Sayfa konumu">
+    <a href="{% url 'catalog:home' %}">Ana sayfa</a>
+    <span class="breadcrumb-sep" aria-hidden="true">/</span>
+    <a href="{% url 'catalog:home' %}#spa-urunler">Ürünler</a>
+    <span class="breadcrumb-sep" aria-hidden="true">/</span>
+    <span class="breadcrumb-current">{{ product.category.name }}</span>
+  </nav>
+
+  <div class="detail-layout detail-layout--pro">
+    <div class="detail-gallery">
+      <div class="detail-image detail-image--elevated">
+        <a class="detail-image-link" href="#siparis" title="Sipariş bölümüne git">
+          {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+          {% else %}
+            <div class="placeholder-thumb" style="min-height:280px;">Görsel yok</div>
+          {% endif %}
+        </a>
+      </div>
+    </div>
+    <div class="detail-panel">
+      <p class="detail-category muted small">{{ product.category.name }}</p>
+      <h1 class="detail-title">{{ product.name }}</h1>
+      <div class="detail-price-row">
+        <p class="detail-price"><span class="detail-price-value">{{ product.price }}</span> <span class="detail-price-cur">TL</span></p>
+        <span class="detail-fav">{% include "catalog/_favorite_button.html" with product=product %}</span>
+      </div>
+      {% include "catalog/_stock_detail.html" %}
+      {% if product.description %}
+        <div class="product-desc prose">{{ product.description|linebreaks }}</div>
+      {% endif %}
+
+      <div class="buy-box" id="siparis">
+        <p class="buy-box-label">Sipariş</p>
+        {% if product.in_stock %}
+        <form class="qty-row qty-row--boxed" method="post" action="{% url 'cart:add' product.id %}" data-cart-add>
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <div class="qty-field">
+            <span class="qty-field-label" id="adet-label">Adet</span>
+            <div class="qty-stepper" role="group" aria-labelledby="adet-label">
+              <button type="button" class="qty-stepper-btn" data-step="-1" aria-label="Adet azalt">−</button>
+              <input id="adet" name="adet" class="qty-stepper-input" type="number" min="1" max="{{ product.max_order_quantity }}" value="1" inputmode="numeric" aria-labelledby="adet-label" aria-valuemin="1" aria-valuemax="{{ product.max_order_quantity }}" aria-valuenow="1" aria-valuetext="1 adet">
+              <button type="button" class="qty-stepper-btn" data-step="1" aria-label="Adet artır">+</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg btn-block-sm">Sepete ekle</button>
+        </form>
+        {% else %}
+        <p class="buy-box-out muted">Bu ürün şu an stokta yok. Aşağıdan e-postanızı bırakın, stoğa girince ilk siz haberdar olun.</p>
+        <form class="stock-notify-form" method="post" action="{% url 'catalog:stock_notify' product.id %}" data-stock-notify>
+          {% csrf_token %}
+          <div class="stock-notify-row">
+            <input
+              type="email"
+              name="email"
+              class="stock-notify-input"
+              placeholder="ornek@eposta.com"
+              value="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+              aria-label="E-posta adresiniz"
+              required
+            >
+            <button type="submit" class="btn btn-primary stock-notify-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              Stok gelince haber ver
+            </button>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if related_products %}
+  <section class="section section-related">
+    <header class="section-head">
+      <h2 class="section-title">Benzer ürünler</h2>
+    </header>
+    <div class="grid-products">
+      {% for p in related_products %}
+        <article class="card">
+          <div class="card-image">
+            <span class="card-badge">{{ p.category.name }}</span>
+            {% include "catalog/_favorite_button.html" with product=p %}
+            <a class="card-image-link" href="{{ p.get_absolute_url }}" aria-label="{{ p.name }} — ürün detayı">
+              {% if p.image %}
+                <img src="{{ p.image.url }}" alt="">
+              {% else %}
+                <div class="placeholder-thumb">Görsel yok</div>
+              {% endif %}
+            </a>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title"><a href="{{ p.get_absolute_url }}">{{ p.name }}</a></h3>
+            <p class="price"><span class="price-value">{{ p.price }}</span> <span class="price-currency">TL</span></p>
+            {% include "catalog/_stock_line.html" with product=p %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+{% if product.in_stock %}
+<script>
+(function () {
+  var root = document.querySelector(".buy-box .qty-stepper");
+  var input = document.getElementById("adet");
+  if (!root || !input) return;
+  var min = parseInt(input.getAttribute("min"), 10) || 1;
+  var max = parseInt(input.getAttribute("max"), 10) || 99;
+  function syncAria(v) {
+    input.setAttribute("aria-valuenow", String(v));
+    input.setAttribute("aria-valuetext", v + " adet");
+  }
+  function setVal(n) {
+    n = Math.max(min, Math.min(max, parseInt(n, 10) || min));
+    input.value = String(n);
+    syncAria(n);
+  }
+  function readVal() {
+    var t = input.value.trim();
+    if (t === "") return min;
+    var v = parseInt(t, 10);
+    return isNaN(v) ? min : v;
+  }
+  function commitKeyboard() {
+    setVal(readVal());
+  }
+  root.querySelectorAll(".qty-stepper-btn").forEach(function (btn) {
+    btn.addEventListener("mousedown", function (e) {
+      e.preventDefault();
+    });
+    btn.addEventListener("click", function () {
+      var step = parseInt(btn.getAttribute("data-step"), 10);
+      setVal(readVal() + step);
+    });
+  });
+  input.addEventListener("input", function () {
+    input.value = input.value.replace(/[^\d]/g, "").slice(0, 2);
+  });
+  input.addEventListener("blur", commitKeyboard);
+  input.addEventListener("change", commitKeyboard);
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commitKeyboard();
+      input.blur();
+    }
+  });
+  syncAria(readVal());
+})();
+</script>
+{% endif %}
+</div>
+{% endblock %}

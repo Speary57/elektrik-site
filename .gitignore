@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+.venv/
+venv/
+.env
+
+# Masaüstü uygulama (GitHub'a gönderilmez)
+stok-app/
+*.exe
+*.dll
+*.pdb
+appsettings.json
+
+# IDE / yerel
+.cursor/

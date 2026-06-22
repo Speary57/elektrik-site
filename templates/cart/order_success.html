@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Sipariş alındı — Kılağuz Elektrik ve Yapı Market{% endblock %}
+
+{% block content %}
+<div class="container checkout-page">
+  <ol class="checkout-steps" aria-label="Sipariş adımları">
+    <li class="checkout-step is-done"><span class="checkout-step-no">1</span> Sepet</li>
+    <li class="checkout-step is-done"><span class="checkout-step-no">2</span> Teslimat &amp; ödeme</li>
+    <li class="checkout-step is-active"><span class="checkout-step-no">3</span> Onay</li>
+  </ol>
+
+  <div class="order-success panel panel--elevated">
+    <span class="order-success-badge" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6 9 17l-5-5"/>
+      </svg>
+    </span>
+    <h1 class="order-success-title">Siparişiniz alındı</h1>
+    <p class="order-success-lead muted">
+      Teşekkürler {{ order.full_name }}! Ödemeniz onaylandı ve siparişiniz hazırlanmaya alındı.
+      Sipariş özetini <strong>{{ order.email }}</strong> adresine de iletiyoruz.
+    </p>
+
+    <div class="order-meta">
+      <div class="order-meta-item">
+        <span class="order-meta-label">Sipariş numarası</span>
+        <span class="order-meta-value">{{ order.order_number }}</span>
+      </div>
+      <div class="order-meta-item">
+        <span class="order-meta-label">Ödeme</span>
+        <span class="order-meta-value">{{ order.get_payment_status_display }} · **** {{ order.card_last4 }}</span>
+      </div>
+      <div class="order-meta-item">
+        <span class="order-meta-label">Genel toplam</span>
+        <span class="order-meta-value">{{ order.total }} TL</span>
+      </div>
+    </div>
+
+    <div class="order-detail-grid">
+      <section class="order-detail-block" aria-labelledby="order-items-h">
+        <h2 id="order-items-h" class="order-detail-title">Ürünler</h2>
+        <ul class="order-items-list">
+          {% for item in order.items.all %}
+            <li class="order-items-row">
+              <span class="order-items-qty">{{ item.quantity }}×</span>
+              <span class="order-items-name">{{ item.product_name }}</span>
+              <span class="order-items-total">{{ item.line_total }} TL</span>
+            </li>
+          {% endfor %}
+        </ul>
+        <div class="order-totals">
+          <div class="order-totals-row order-totals-row--total"><span>Genel toplam</span><strong>{{ order.total }} TL</strong></div>
+        </div>
+      </section>
+
+      <section class="order-detail-block" aria-labelledby="order-delivery-h">
+        <h2 id="order-delivery-h" class="order-detail-title">Teslimat</h2>
+        <p class="order-delivery-line"><strong>{{ order.full_name }}</strong></p>
+        <p class="order-delivery-line muted">{{ order.phone }}</p>
+        <p class="order-delivery-line">{{ order.address }}</p>
+        <p class="order-delivery-line">{{ order.district }} / {{ order.city }}</p>
+        {% if order.note %}<p class="order-delivery-note muted small">Not: {{ order.note }}</p>{% endif %}
+      </section>
+    </div>
+
+    <div class="order-success-actions">
+      <a class="btn btn-primary" href="{% url 'catalog:home' %}#spa-urunler">Alışverişe devam et</a>
+      <a class="btn btn-primary" href="{% url 'accounts:orders' %}">Tüm siparişlerim</a>
+      <a class="btn btn-secondary" href="{% url 'catalog:home' %}#spa-ana">Ana sayfa</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

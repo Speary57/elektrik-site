@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Tüm siparişlerim — Kılağuz Elektrik ve Yapı Market{% endblock %}
+
+{% block content %}
+<div class="container account-page">
+  <header class="account-head">
+    <p class="page-eyebrow">Hesabım</p>
+    <h1 class="account-title">Tüm siparişlerim</h1>
+    <p class="account-sub muted">Geçmiş ve güncel siparişlerinizi buradan takip edebilirsiniz. Sipariş iptali için sipariş detaylarına girip, siparişinizi iptal edebilirsiniz.</p>
+  </header>
+
+  {% if orders %}
+    <ul class="order-card-list">
+      {% for order in orders %}
+        <li>
+          <a class="order-card" href="{% url 'accounts:order_detail' order.order_number %}">
+            <div class="order-card-main">
+              <span class="order-card-no">{{ order.order_number }}</span>
+              <span class="order-card-date muted">{{ order.created_at|date:"d.m.Y H:i" }} · {{ order.item_count }} ürün</span>
+            </div>
+            <div class="order-card-meta">
+              <span class="order-status order-status--{{ order.status }}">{{ order.get_status_display }}</span>
+              <span class="order-card-total">{{ order.total }} TL</span>
+              <span class="order-card-arrow" aria-hidden="true">›</span>
+            </div>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="account-empty panel panel--elevated">
+      <p class="empty-title">Henüz siparişiniz yok</p>
+      <p class="muted">İlk siparişinizi verdiğinizde burada görünecek.</p>
+      <a class="btn btn-primary" href="{% url 'catalog:home' %}#spa-urunler">Ürünleri incele</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

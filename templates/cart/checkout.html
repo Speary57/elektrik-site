@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+
+{% block title %}Ödeme — Kılağuz Elektrik ve Yapı Market{% endblock %}
+
+{% block content %}
+<div class="container checkout-page">
+  <header class="page-head page-head--cart">
+    <div>
+      <p class="page-eyebrow">Ödeme</p>
+      <h1 class="page-title">Siparişi tamamla</h1>
+      <p class="page-desc muted">Teslimat ve ödeme bilgilerinizi girerek siparişinizi tamamlayın.</p>
+    </div>
+  </header>
+
+  <ol class="checkout-steps" aria-label="Sipariş adımları">
+    <li class="checkout-step is-done"><span class="checkout-step-no">1</span> Sepet</li>
+    <li class="checkout-step is-active"><span class="checkout-step-no">2</span> Teslimat &amp; ödeme</li>
+    <li class="checkout-step"><span class="checkout-step-no">3</span> Onay</li>
+  </ol>
+
+  <form method="post" action="{% url 'cart:checkout' %}" novalidate class="checkout-layout">
+    {% csrf_token %}
+
+    <div class="checkout-main">
+      <section class="checkout-card panel panel--elevated" aria-labelledby="checkout-teslimat">
+        <h2 id="checkout-teslimat" class="checkout-card-title">Teslimat bilgileri</h2>
+
+        {% if addresses %}
+        <div class="address-picker" id="address-picker" data-default-full-name="{{ default_full_name }}" data-default-phone="{{ default_phone }}">
+          <p class="address-picker-label">Kayıtlı adreslerim</p>
+          <div class="address-list">
+            {% for a in addresses %}
+              <label class="address-option{% if forloop.first %} is-selected{% endif %}">
+                <input
+                  type="radio"
+                  name="saved_address"
+                  value="{{ a.id }}"
+                  {% if forloop.first %}checked{% endif %}
+                  data-full-name="{{ a.full_name }}"
+                  data-phone="{{ a.phone }}"
+                  data-city="{{ a.city }}"
+                  data-district="{{ a.district }}"
+                  data-address="{{ a.address }}"
+                >
+                <span class="address-option-body">
+                  <span class="address-option-title">{{ a.full_name }} · {{ a.label }}</span>
+                  <span class="address-option-text">{{ a.address }}</span>
+                  <span class="address-option-phone muted">{{ a.phone }}</span>
+                </span>
+              </label>
+            {% endfor %}
+            <label class="address-option address-option--new">
+              <input type="radio" name="saved_address" value="">
+              <span class="address-option-body">
+                <span class="address-option-title">+ Yeni adres gir</span>
+                <span class="address-option-text muted">Aşağıdaki alanları doldurun</span>
+              </span>
+            </label>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="checkout-grid">
+          <div class="checkout-field checkout-field--full">
+            <label class="checkout-label" for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
+            {{ form.full_name }}
+            {% if form.full_name.errors %}<p class="checkout-error">{{ form.full_name.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="checkout-field">
+            <label class="checkout-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+            {{ form.email }}
+            {% if form.email.errors %}<p class="checkout-error">{{ form.email.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="checkout-field">
+            <label class="checkout-label" for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}<p class="checkout-error">{{ form.phone.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="checkout-field">
+            <label class="checkout-label" for="{{ form.city.id_for_label }}">{{ form.city.label }}</label>
+            {{ form.city }}
+            {% if form.city.errors %}<p class="checkout-error">{{ form.city.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="checkout-field">
+            <label class="checkout-label" for="{{ form.district.id_for_label }}">{{ form.district.label }}</label>
+            {{ form.district }}
+            {% if form.district.errors %}<p class="checkout-error">{{ form.district.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="checkout-field checkout-field--full">
+            <label class="checkout-label" for="{{ form.address.id_for_label }}">{{ form.address.label }}</label>
+            {{ form.address }}
+            {% if form.address.errors %}<p class="checkout-error">{{ form.address.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="checkout-field checkout-field--full">
+            <label class="checkout-label" for="{{ form.note.id_for_label }}">{{ form.note.label }}</label>
+            {{ form.note }}
+            {% if form.note.errors %}<p class="checkout-error">{{ form.note.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="checkout-field checkout-field--full">
+            <label class="checkout-save-address">
+              {{ form.save_address }}
+              <span>{{ form.save_address.label }}</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="checkout-card panel panel--elevated" aria-labelledby="checkout-odeme">
+        <div class="checkout-card-head">
+          <h2 id="checkout-odeme" class="checkout-card-title">Kart ile ödeme</h2>
+          <span class="checkout-secure" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            Güvenli ödeme
+          </span>
+        </div>
+        {% if cards %}
+        <div class="address-picker" id="card-picker">
+          <p class="address-picker-label">Kayıtlı kartlarım</p>
+          <div class="address-list">
+            {% for c in cards %}
+              <label class="address-option{% if forloop.first %} is-selected{% endif %}">
+                <input
+                  type="radio"
+                  name="saved_card"
+                  value="{{ c.id }}"
+                  {% if forloop.first %}checked{% endif %}
+                  data-card-name="{{ c.card_name }}"
+                  data-card-number="{{ c.digits }}"
+                  data-card-expiry="{{ c.card_expiry }}"
+                >
+                <span class="address-option-body">
+                  <span class="address-option-title">{{ c.card_name }}</span>
+                  <span class="address-option-text">{{ c.masked }}</span>
+                  <span class="address-option-phone muted">Son kullanma: {{ c.card_expiry }}</span>
+                </span>
+              </label>
+            {% endfor %}
+            <label class="address-option address-option--new">
+              <input type="radio" name="saved_card" value="">
+              <span class="address-option-body">
+                <span class="address-option-title">+ Yeni kart gir</span>
+                <span class="address-option-text muted">Aşağıdaki alanları doldurun</span>
+              </span>
+            </label>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="checkout-grid">
+          <div class="checkout-field checkout-field--full">
+            <label class="checkout-label" for="{{ form.card_name.id_for_label }}">{{ form.card_name.label }}</label>
+            {{ form.card_name }}
+            {% if form.card_name.errors %}<p class="checkout-error">{{ form.card_name.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="checkout-field checkout-field--full">
+            <label class="checkout-label" for="{{ form.card_number.id_for_label }}">{{ form.card_number.label }}</label>
+            {{ form.card_number }}
+            {% if form.card_number.errors %}<p class="checkout-error">{{ form.card_number.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="checkout-field">
+            <label class="checkout-label" for="{{ form.card_expiry.id_for_label }}">{{ form.card_expiry.label }}</label>
+            {{ form.card_expiry }}
+            {% if form.card_expiry.errors %}<p class="checkout-error">{{ form.card_expiry.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="checkout-field">
+            <label class="checkout-label" for="{{ form.card_cvc.id_for_label }}">{{ form.card_cvc.label }}</label>
+            {{ form.card_cvc }}
+            {% if form.card_cvc.errors %}<p class="checkout-error">{{ form.card_cvc.errors.0 }}</p>{% endif %}
+          </div>
+          <div class="checkout-field checkout-field--full">
+            <label class="checkout-save-address">
+              {{ form.save_card }}
+              <span>{{ form.save_card.label }}</span>
+            </label>
+          </div>
+        </div>
+        <p class="checkout-demo-note">Bu bir tanıtım ödeme adımıdır; güvenlik gereği kart güvenlik kodunuz (CVC) hiçbir zaman saklanmaz ve her ödemede yeniden istenir.</p>
+      </section>
+    </div>
+
+    <aside class="checkout-aside">
+      <div class="checkout-summary panel panel--elevated">
+        <h2 class="checkout-summary-title">Sipariş özeti</h2>
+        <ul class="checkout-items">
+          {% for line in lines %}
+            <li class="checkout-item">
+              <span class="checkout-item-qty">{{ line.quantity }}×</span>
+              <span class="checkout-item-name">{{ line.product.name }}</span>
+              <span class="checkout-item-total">{{ line.line_total }} TL</span>
+            </li>
+          {% endfor %}
+        </ul>
+        <div class="checkout-summary-row checkout-summary-row--total">
+          <span>Genel toplam</span>
+          <strong class="checkout-grand-total">{{ total }} TL</strong>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg checkout-submit">{{ total }} TL öde</button>
+        <a class="btn btn-secondary checkout-back" href="{% url 'cart:detail' %}">← Sepete dön</a>
+      </div>
+    </aside>
+  </form>
+</div>
+
+<script>
+(function () {
+  function onlyDigits(value) {
+    return value.replace(/\D+/g, "");
+  }
+
+  // Çift gönderim koruması: forma bir kez gönderildikten sonra tekrar gönderilmesin.
+  (function () {
+    var form = document.querySelector("form.checkout-layout");
+    if (!form) return;
+    var submitBtn = form.querySelector(".checkout-submit");
+    var submitted = false;
+    form.addEventListener("submit", function (e) {
+      if (submitted) {
+        e.preventDefault();
+        return;
+      }
+      submitted = true;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add("is-loading");
+        submitBtn.textContent = "İşleniyor…";
+      }
+    });
+  })();
+
+  // Kayıtlı adres seçimi: seçilen adresi teslimat alanlarına doldur.
+  (function () {
+    var picker = document.getElementById("address-picker");
+    if (!picker) return;
+    var fullName = document.getElementById("id_full_name");
+    var phone = document.getElementById("id_phone");
+    var city = document.getElementById("id_city");
+    var district = document.getElementById("id_district");
+    var address = document.getElementById("id_address");
+    var saveWrap = document.querySelector(".checkout-save-address");
+    var saveCheck = document.getElementById("id_save_address");
+
+    function setField(el, val) {
+      if (el) el.value = val || "";
+    }
+
+    function fillFromRadio(radio) {
+      var isNew = !radio.value;
+      picker.querySelectorAll(".address-option").forEach(function (opt) {
+        opt.classList.remove("is-selected");
+      });
+      var label = radio.closest(".address-option");
+      if (label) label.classList.add("is-selected");
+
+      if (isNew) {
+        // Ad soyad ve telefon korunur (kullanıcının profil bilgileri),
+        // yalnızca adres alanları temizlenir.
+        setField(fullName, picker.dataset.defaultFullName);
+        setField(phone, picker.dataset.defaultPhone);
+        setField(city, "");
+        setField(district, "");
+        setField(address, "");
+        // Kaydet kutusu görünür olur ama otomatik işaretlenmez; kullanıcı seçer.
+        if (saveWrap) saveWrap.style.display = "";
+      } else {
+        setField(fullName, radio.dataset.fullName);
+        setField(phone, radio.dataset.phone);
+        setField(city, radio.dataset.city);
+        setField(district, radio.dataset.district);
+        setField(address, radio.dataset.address);
+        // Zaten kayıtlı adres seçildiyse tekrar kaydetmeye gerek yok.
+        if (saveWrap) saveWrap.style.display = "none";
+        if (saveCheck) saveCheck.checked = false;
+      }
+    }
+
+    picker.querySelectorAll("input[name='saved_address']").forEach(function (r) {
+      r.addEventListener("change", function () {
+        fillFromRadio(r);
+      });
+    });
+
+    var checked = picker.querySelector("input[name='saved_address']:checked");
+    if (checked && checked.value) {
+      // Sayfa formu zaten son adresle dolu; yalnızca kaydet kutusunu gizle.
+      if (saveWrap) saveWrap.style.display = "none";
+      if (saveCheck) saveCheck.checked = false;
+    }
+  })();
+
+  // Kayıtlı kart seçimi: seçilen kartı ödeme alanlarına doldur (CVC hariç).
+  (function () {
+    var picker = document.getElementById("card-picker");
+    if (!picker) return;
+    var cardName = document.getElementById("id_card_name");
+    var cardNumber = document.getElementById("id_card_number");
+    var cardExpiry = document.getElementById("id_card_expiry");
+    var cardCvc = document.getElementById("id_card_cvc");
+    var saveWrap = picker
+      .closest(".checkout-card")
+      .querySelector(".checkout-save-address");
+    var saveCheck = document.getElementById("id_save_card");
+
+    function setField(el, val) {
+      if (el) el.value = val || "";
+    }
+
+    function spaceDigits(digits) {
+      digits = (digits || "").replace(/\D+/g, "").slice(0, 19);
+      var out = "";
+      for (var i = 0; i < digits.length; i += 4) {
+        out += (i ? " " : "") + digits.slice(i, i + 4);
+      }
+      return out;
+    }
+
+    function fillFromRadio(radio) {
+      var isNew = !radio.value;
+      picker.querySelectorAll(".address-option").forEach(function (opt) {
+        opt.classList.remove("is-selected");
+      });
+      var label = radio.closest(".address-option");
+      if (label) label.classList.add("is-selected");
+
+      if (isNew) {
+        setField(cardName, "");
+        setField(cardNumber, "");
+        setField(cardExpiry, "");
+        setField(cardCvc, "");
+        // Kaydet kutusu görünür olur ama otomatik işaretlenmez; kullanıcı seçer.
+        if (saveWrap) saveWrap.style.display = "";
+      } else {
+        setField(cardName, radio.dataset.cardName);
+        setField(cardNumber, spaceDigits(radio.dataset.cardNumber));
+        setField(cardExpiry, radio.dataset.cardExpiry);
+        // CVC güvenlik gereği saklanmaz; her ödemede yeniden girilir.
+        setField(cardCvc, "");
+        if (saveWrap) saveWrap.style.display = "none";
+        if (saveCheck) saveCheck.checked = false;
+      }
+    }
+
+    picker.querySelectorAll("input[name='saved_card']").forEach(function (r) {
+      r.addEventListener("change", function () {
+        fillFromRadio(r);
+      });
+    });
+
+    var checked = picker.querySelector("input[name='saved_card']:checked");
+    if (checked && checked.value) {
+      if (saveWrap) saveWrap.style.display = "none";
+      if (saveCheck) saveCheck.checked = false;
+    }
+  })();
+
+  // Telefon: 05-- --- -- -- (4-3-2-2), yalnızca rakam, en fazla 11 hane.
+  var phone = document.getElementById("id_phone");
+  if (phone) {
+    var formatPhone = function (value) {
+      var d = onlyDigits(value).slice(0, 11);
+      var out = d.slice(0, 4);
+      if (d.length > 4) out += " " + d.slice(4, 7);
+      if (d.length > 7) out += " " + d.slice(7, 9);
+      if (d.length > 9) out += " " + d.slice(9, 11);
+      return out;
+    };
+    phone.value = formatPhone(phone.value);
+    phone.addEventListener("input", function () {
+      phone.value = formatPhone(phone.value);
+    });
+  }
+
+  // Yalnızca harf (Türkçe dâhil) ve boşluk girilebilen alanlar.
+  function lettersOnly(value) {
+    return value.replace(/[^\p{L}\s]/gu, "");
+  }
+  ["id_full_name", "id_city", "id_district", "id_card_name"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", function () {
+      var cleaned = lettersOnly(el.value);
+      if (cleaned !== el.value) el.value = cleaned;
+    });
+  });
+
+  // Her kelime büyük harfle başlasın (ad soyad + kart üzerindeki isim).
+  function titleCaseField(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", function () {
+      var caret = el.selectionStart;
+      var titled = el.value.replace(/(^|\s)(\p{L})/gu, function (m, sep, ch) {
+        return sep + ch.toLocaleUpperCase("tr-TR");
+      });
+      if (titled !== el.value) {
+        el.value = titled;
+        try {
+          el.setSelectionRange(caret, caret);
+        } catch (e) {}
+      }
+    });
+  }
+  titleCaseField("id_full_name");
+  titleCaseField("id_card_name");
+
+  var cardNumber = document.getElementById("id_card_number");
+  if (cardNumber) {
+    cardNumber.addEventListener("input", function () {
+      var d = onlyDigits(cardNumber.value).slice(0, 16);
+      cardNumber.value = d.replace(/(.{4})/g, "$1 ").trim();
+    });
+  }
+
+  var cardExpiry = document.getElementById("id_card_expiry");
+
+  function expiryIsPast(value) {
+    var m = /^(\d{2})\/(\d{2})$/.exec((value || "").trim());
+    if (!m) return false;
+    var month = parseInt(m[1], 10);
+    if (month < 1 || month > 12) return false;
+    var year = 2000 + parseInt(m[2], 10);
+    var now = new Date();
+    return (year < now.getFullYear()) ||
+      (year === now.getFullYear() && month < now.getMonth() + 1);
+  }
+
+  function showExpiryError(message) {
+    if (!cardExpiry) return;
+    var field = cardExpiry.closest(".checkout-field") || cardExpiry.parentNode;
+    var err = field.querySelector(".checkout-error");
+    if (message) {
+      if (!err) {
+        err = document.createElement("p");
+        err.className = "checkout-error";
+        field.appendChild(err);
+      }
+      err.textContent = message;
+    } else if (err) {
+      err.remove();
+    }
+  }
+
+  if (cardExpiry) {
+    cardExpiry.addEventListener("input", function (e) {
+      var deleting = e.inputType === "deleteContentBackward";
+      var d = onlyDigits(cardExpiry.value).slice(0, 4);
+      if (d.length >= 2) {
+        var month = d.slice(0, 2);
+        if (parseInt(month, 10) > 12) {
+          month = "12";
+        }
+        if (d.length === 2 && deleting) {
+          cardExpiry.value = month;
+        } else {
+          cardExpiry.value = month + "/" + d.slice(2);
+        }
+      } else {
+        cardExpiry.value = d;
+      }
+      if (cardExpiry.value.length === 5) {
+        showExpiryError(expiryIsPast(cardExpiry.value) ? "Son kullanma tarihi geçmiş olamaz." : "");
+      } else {
+        showExpiryError("");
+      }
+    });
+
+    var form = cardExpiry.closest("form");
+    if (form) {
+      form.addEventListener("submit", function (ev) {
+        if (expiryIsPast(cardExpiry.value)) {
+          ev.preventDefault();
+          showExpiryError("Son kullanma tarihi geçmiş olamaz.");
+          cardExpiry.focus();
+        }
+      });
+    }
+  }
+
+  var cardCvc = document.getElementById("id_card_cvc");
+  if (cardCvc) {
+    cardCvc.addEventListener("input", function () {
+      cardCvc.value = onlyDigits(cardCvc.value).slice(0, 3);
+    });
+  }
+})();
+</script>
+{% endblock %}

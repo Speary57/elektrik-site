@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Kullanıcı bilgilerim — Kılağuz Elektrik ve Yapı Market{% endblock %}
+
+{% block content %}
+<div class="container account-page">
+  <header class="account-head">
+    <p class="page-eyebrow">Hesabım</p>
+    <h1 class="account-title">Kullanıcı bilgilerim</h1>
+    <p class="account-sub muted">Bilgilerinizi güncelleyebilirsiniz. Doğum tarihi isteğe bağlıdır.</p>
+  </header>
+
+  <form method="post" action="{% url 'accounts:profile' %}" novalidate class="account-card panel panel--elevated auth-form">
+    {% csrf_token %}
+
+    <div class="auth-grid-2">
+      <div class="auth-field">
+        <label class="auth-label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+        {{ form.first_name }}
+        {% if form.first_name.errors %}<p class="auth-error">{{ form.first_name.errors.0 }}</p>{% endif %}
+      </div>
+      <div class="auth-field">
+        <label class="auth-label" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+        {{ form.last_name }}
+        {% if form.last_name.errors %}<p class="auth-error">{{ form.last_name.errors.0 }}</p>{% endif %}
+      </div>
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+      {{ form.email }}
+      {% if form.email.errors %}<p class="auth-error">{{ form.email.errors.0 }}</p>{% endif %}
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-label" for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+      {{ form.phone }}
+      {% if form.phone.errors %}<p class="auth-error">{{ form.phone.errors.0 }}</p>{% endif %}
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-label">{{ form.birth_date.label }}</label>
+      <div class="auth-date">{{ form.birth_date }}</div>
+      {% if form.birth_date.errors %}<p class="auth-error">{{ form.birth_date.errors.0 }}</p>{% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg account-update">Güncelle</button>
+  </form>
+</div>
+
+<script>
+(function () {
+  // Ad / Soyad: yalnızca harf (Türkçe dâhil) ve boşluk.
+  function lettersOnly(value) {
+    return value.replace(/[^\p{L}\s]/gu, "");
+  }
+  ["id_first_name", "id_last_name"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", function () {
+      var cleaned = lettersOnly(el.value);
+      if (cleaned !== el.value) el.value = cleaned;
+    });
+  });
+
+  var phone = document.getElementById("id_phone");
+  if (!phone) return;
+  function format(value) {
+    var d = value.replace(/\D+/g, "").slice(0, 11);
+    var out = d.slice(0, 4);
+    if (d.length > 4) out += " " + d.slice(4, 7);
+    if (d.length > 7) out += " " + d.slice(7, 9);
+    if (d.length > 9) out += " " + d.slice(9, 11);
+    return out;
+  }
+  phone.value = format(phone.value);
+  phone.addEventListener("input", function () {
+    phone.value = format(phone.value);
+  });
+})();
+</script>
+{% endblock %}

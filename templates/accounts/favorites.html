@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Favorilerim — Kılağuz Elektrik ve Yapı Market{% endblock %}
+
+{% block content %}
+<div class="container account-page">
+  <header class="account-head">
+    <p class="page-eyebrow">Hesabım</p>
+    <h1 class="account-title">Favorilerim</h1>
+    <p class="account-sub muted">Beğendiğiniz ürünleri burada toplayın; kalp simgesine tekrar dokunarak listeden çıkarabilirsiniz.</p>
+  </header>
+
+  <div class="grid-products grid-products--catalog" id="favorites-grid"{% if not products %} hidden{% endif %}>
+    {% for p in products %}
+      <article class="card">
+        <div class="card-image">
+          <span class="card-badge">{{ p.category.name }}</span>
+          {% include "catalog/_favorite_button.html" with product=p %}
+          <a class="card-image-link" href="{{ p.get_absolute_url }}" aria-label="{{ p.name }} — ürün detayı">
+            {% if p.image %}
+              <img src="{{ p.image.url }}" alt="">
+            {% else %}
+              <div class="placeholder-thumb">Görsel yok</div>
+            {% endif %}
+          </a>
+        </div>
+        <div class="card-body">
+          <h2 class="card-title"><a href="{{ p.get_absolute_url }}">{{ p.name }}</a></h2>
+          <p class="card-meta muted small">{{ p.category.name }}</p>
+          <p class="price"><span class="price-value">{{ p.price }}</span> <span class="price-currency">TL</span></p>
+          {% include "catalog/_stock_line.html" with product=p %}
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+
+  <div class="account-empty panel panel--elevated" id="favorites-empty"{% if products %} hidden{% endif %}>
+    <p class="empty-title">Henüz favoriniz yok</p>
+    <p class="muted">Ürünlerin üzerindeki kalp simgesine dokunarak favorilerinize ekleyebilirsiniz.</p>
+    <a class="btn btn-primary" href="{% url 'catalog:home' %}#spa-urunler">Ürünleri incele</a>
+  </div>
+</div>
+{% endblock %}

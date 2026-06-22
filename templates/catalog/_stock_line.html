@@ -1,0 +1,8 @@
+{# product: Product — vitrin satırı #}
+{% if product.stock_quantity == 0 %}
+  <p class="stock-line"><span class="stock-pill stock-pill--out">Stokta yok</span></p>
+{% elif product.stock_quantity <= 5 %}
+  <p class="stock-line"><span class="stock-pill stock-pill--low">Son {{ product.stock_quantity }} adet</span></p>
+{% else %}
+  <p class="stock-line"><span class="stock-pill stock-pill--ok">Stokta <strong>{{ product.stock_quantity }}</strong> adet</span></p>
+{% endif %}

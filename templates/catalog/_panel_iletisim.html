@@ -1,0 +1,243 @@
+<div class="container contact-page">
+  <header class="contact-page-head contact-page-hero">
+    <div>
+      <p class="page-eyebrow">İletişim</p>
+      <h1 class="page-title" id="spa-iletisim-heading">İletişim</h1>
+      <p class="page-desc contact-page-lead">
+        <span class="contact-page-lead-row">Formu doldurarak bize ulaşabilir veya</span>
+        <span class="contact-page-lead-row">sağdaki bilgilerden doğrudan arayıp e-posta gönderebilirsiniz.</span>
+      </p>
+    </div>
+  </header>
+
+  <div class="contact-layout">
+    <div class="contact-layout__main">
+      <section class="contact-form-section contact-form-surface" aria-labelledby="contact-bize-heading">
+        <h2 id="contact-bize-heading" class="contact-bize-main-title">Bize ulaşın</h2>
+
+        <form
+          id="contact-form-bize"
+          class="contact-form"
+          method="post"
+          action="{% url 'catalog:contact_submit' %}"
+        >
+          {% csrf_token %}
+
+          <div class="contact-form-stack">
+            <div class="contact-form-field">
+              <label class="contact-form-label" for="contact-ad-soyad">Adınız soyadınız</label>
+              <input
+                id="contact-ad-soyad"
+                class="contact-form-control"
+                type="text"
+                name="ad_soyad"
+                autocomplete="name"
+                placeholder="Adınız ve soyadınız"
+                maxlength="160"
+                required
+                value="{% if contact_flash %}{{ contact_flash.values.ad_soyad }}{% endif %}"
+              >
+              {% if contact_flash and contact_flash.field_errors.ad_soyad %}
+                <p class="contact-form-error" role="alert">{{ contact_flash.field_errors.ad_soyad }}</p>
+              {% endif %}
+            </div>
+
+            <div class="contact-form-field">
+              <label class="contact-form-label" for="contact-email">E-posta adresiniz</label>
+              <input
+                id="contact-email"
+                class="contact-form-control"
+                type="email"
+                name="email"
+                autocomplete="email"
+                placeholder="ornek@eposta.com"
+                maxlength="254"
+                required
+                value="{% if contact_flash %}{{ contact_flash.values.email }}{% endif %}"
+              >
+              {% if contact_flash and contact_flash.field_errors.email %}
+                <p class="contact-form-error" role="alert">{{ contact_flash.field_errors.email }}</p>
+              {% endif %}
+            </div>
+
+            <div class="contact-form-field">
+              <label class="contact-form-label" for="contact-telefon">Telefon numaranız</label>
+              <input
+                id="contact-telefon"
+                class="contact-form-control"
+                type="text"
+                name="telefon"
+                autocomplete="tel"
+                placeholder="05xx xxx xx xx"
+                inputmode="tel"
+                maxlength="14"
+                minlength="10"
+                required
+                value="{% if contact_flash %}{{ contact_flash.values.telefon }}{% endif %}"
+              >
+              {% if contact_flash and contact_flash.field_errors.telefon %}
+                <p class="contact-form-error" role="alert">{{ contact_flash.field_errors.telefon }}</p>
+              {% endif %}
+            </div>
+
+            <div class="contact-form-field">
+              <label class="contact-form-label" for="contact-mesaj">Mesajınız</label>
+              <textarea
+                id="contact-mesaj"
+                class="contact-form-control contact-form-control--textarea"
+                name="mesaj"
+                rows="5"
+                placeholder="Talebinizi veya sorunuzu buraya yazın…"
+                maxlength="4000"
+                minlength="10"
+                required
+              >{% if contact_flash %}{{ contact_flash.values.mesaj }}{% endif %}</textarea>
+              {% if contact_flash and contact_flash.field_errors.mesaj %}
+                <p class="contact-form-error" role="alert">{{ contact_flash.field_errors.mesaj }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="contact-kvkk-block">
+            <div class="contact-kvkk-row">
+              <span class="contact-kvkk-check-wrap">
+                <input
+                  type="checkbox"
+                  class="contact-kvkk-check"
+                  name="aydinlatma_onay"
+                  id="contact-aydinlatma-onay"
+                  value="on"
+                  required
+                  aria-label="Aydınlatma metnini okudum, onaylıyorum"
+                >
+                <span class="contact-kvkk-check-face" aria-hidden="true">
+                  <svg class="contact-kvkk-check-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path
+                      class="contact-kvkk-check-path"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.75"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      pathLength="100"
+                      d="M6.5 12.5 L10.5 16.5 L17.5 8"
+                    />
+                  </svg>
+                </span>
+              </span>
+              <p class="contact-kvkk-line" id="contact-kvkk-consent-line">
+                <button type="button" class="contact-kvkk-link" id="contact-kvkk-open" aria-haspopup="dialog" aria-controls="contact-kvkk-dialog">
+                  Aydınlatma metnini
+                </button><span class="contact-kvkk-line-rest"> okudum, onaylıyorum.</span>
+              </p>
+            </div>
+            <p class="contact-kvkk-footnote">
+              Uzun aydınlatma metnine yalnızca Aydınlatma metni bağlantısından ulaşılır.
+            </p>
+          </div>
+          <p class="contact-form-error contact-form-error--kvkk" id="contact-kvkk-client-error" hidden role="alert"></p>
+          {% if contact_flash and contact_flash.field_errors.aydinlatma_onay %}
+            <p class="contact-form-error" role="alert">{{ contact_flash.field_errors.aydinlatma_onay }}</p>
+          {% endif %}
+
+          <div class="contact-form-actions">
+            <button type="submit" class="btn btn-primary contact-form-submit">Gönder</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <aside class="contact-layout__aside contact-aside-rail" aria-label="İletişim bilgileri">
+      <article class="contact-aside-card">
+        <div class="contact-aside-card-top">
+          <span class="contact-aside-card-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </span>
+          <h2 class="contact-aside-card-title">Telefon numaramız</h2>
+        </div>
+        <ul class="contact-aside-list">
+          {% if site_settings.phone_primary %}
+            <li><span class="contact-aside-phone">{{ site_settings.phone_primary }}</span></li>
+          {% endif %}
+          {% if site_settings.phone_secondary %}
+            <li><span class="contact-aside-phone">{{ site_settings.phone_secondary }}</span></li>
+          {% endif %}
+        </ul>
+      </article>
+
+      <article class="contact-aside-card">
+        <div class="contact-aside-card-top">
+          <span class="contact-aside-card-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
+              <path d="m22 6-10 7L2 6"/>
+            </svg>
+          </span>
+          <h2 class="contact-aside-card-title">E-posta adresimiz</h2>
+        </div>
+        <p class="contact-aside-email">
+          <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to={{ site_settings.email|urlencode }}&amp;su={{ 'Web sitesi üzerinden iletişim'|urlencode }}&amp;body={{ 'Merhaba, web siteniz üzerinden sizinle iletişime geçmek istiyorum.'|urlencode }}" target="_blank" rel="noopener">{{ site_settings.email }}</a>
+        </p>
+      </article>
+
+      <article class="contact-aside-card">
+        <div class="contact-aside-card-top">
+          <span class="contact-aside-card-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 21s-8-4.5-8-11a8 8 0 0 1 16 0c0 6.5-8 11-8 11z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </span>
+          <h2 class="contact-aside-card-title">Adresimiz</h2>
+        </div>
+        <p class="contact-aside-address">
+          {{ site_settings.address|linebreaksbr }}
+        </p>
+        {% if site_settings.map_embed %}
+          <div class="contact-aside-map" id="contact-map">
+            {{ site_settings.map_embed|safe }}
+          </div>
+        {% endif %}
+      </article>
+    </aside>
+  </div>
+
+  <div class="contact-page-cta contact-page-cta--bar">
+    <p class="contact-page-cta-lead">
+      <a class="btn btn-primary spa-nav" href="{% url 'catalog:home' %}#spa-urunler" data-spa-panel="urunler">Ürünleri incele</a>
+      <a class="btn btn-secondary spa-nav" href="{% url 'catalog:home' %}#spa-ana" data-spa-panel="ana">Anasayfaya dön</a>
+    </p>
+  </div>
+</div>
+
+<script>
+(function () {
+  // Adınız soyadınız: yalnızca harf (Türkçe dâhil) ve boşluk.
+  var adSoyad = document.getElementById("contact-ad-soyad");
+  if (adSoyad) {
+    adSoyad.addEventListener("input", function () {
+      var cleaned = adSoyad.value.replace(/[^\p{L}\s]/gu, "");
+      if (cleaned !== adSoyad.value) adSoyad.value = cleaned;
+    });
+  }
+
+  // Telefon: 05-- --- -- -- (4-3-2-2), yalnızca rakam, en fazla 11 hane.
+  var tel = document.getElementById("contact-telefon");
+  if (tel) {
+    var formatPhone = function (value) {
+      var d = value.replace(/\D+/g, "").slice(0, 11);
+      var out = d.slice(0, 4);
+      if (d.length > 4) out += " " + d.slice(4, 7);
+      if (d.length > 7) out += " " + d.slice(7, 9);
+      if (d.length > 9) out += " " + d.slice(9, 11);
+      return out;
+    };
+    tel.value = formatPhone(tel.value);
+    tel.addEventListener("input", function () {
+      tel.value = formatPhone(tel.value);
+    });
+  }
+})();
+</script>

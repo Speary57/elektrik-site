@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Sepet — Kılağuz Elektrik ve Yapı Market{% endblock %}
+
+{% block content %}
+<div class="container">
+  <header class="page-head page-head--cart">
+    <div>
+      <p class="page-eyebrow">Alışveriş</p>
+      <h1 class="page-title">Sepetiniz</h1>
+      <p class="page-desc muted">Adet değiştirdiğinizde sepet otomatik güncellenir.</p>
+    </div>
+  </header>
+
+  {% if lines %}
+    <div class="cart-layout">
+      <div class="cart-main panel panel--elevated">
+        <form id="cart-update-form" method="post" action="{% url 'cart:update' %}">
+          {% csrf_token %}
+          <div class="table-wrap">
+            <table class="cart-table">
+              <thead>
+                <tr>
+                  <th>Ürün</th>
+                  <th>Adet</th>
+                  <th>Birim</th>
+                  <th>Ara toplam</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for line in lines %}
+                  <tr>
+                    <td data-label="Ürün">
+                      <a class="cart-product-link" href="{{ line.product.get_absolute_url }}">{{ line.product.name }}</a>
+                      <p class="cart-stock muted small">Güncel stok: <strong>{{ line.product.stock_quantity }}</strong> adet</p>
+                    </td>
+                    <td data-label="Adet">
+                      <div class="qty-stepper qty-stepper--compact" role="group" aria-label="{{ line.product.name }} adet">
+                        <button type="button" class="qty-stepper-btn" data-qty-dec aria-label="Azalt">−</button>
+                        <input class="qty-stepper-input" type="number" name="adet_{{ line.product.id }}" min="0" max="{{ line.product.max_order_quantity }}" value="{{ line.quantity }}" inputmode="numeric" aria-live="polite">
+                        <button type="button" class="qty-stepper-btn" data-qty-inc aria-label="Artır">+</button>
+                      </div>
+                    </td>
+                    <td data-label="Birim">{{ line.product.price }} TL</td>
+                    <td data-label="Ara toplam"><strong class="cart-line-total">{{ line.line_total }} TL</strong></td>
+                    <td class="cart-remove-cell">
+                      <button type="submit" form="remove-{{ line.product.id }}" class="btn btn-ghost btn-sm">Kaldır</button>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+        <div class="cart-actions">
+          <a class="btn btn-secondary" href="{% url 'catalog:home' %}#spa-urunler">← Alışverişe devam</a>
+        </div>
+        {% for line in lines %}
+          <form id="remove-{{ line.product.id }}" method="post" action="{% url 'cart:remove' line.product.id %}" style="display:none;">{% csrf_token %}</form>
+        {% endfor %}
+      </div>
+
+      <aside class="cart-aside">
+        <div class="cart-summary panel panel--elevated">
+          <h2 class="cart-summary-title">Özet</h2>
+          <div class="cart-summary-row">
+            <span class="muted">Genel toplam</span>
+            <strong class="cart-summary-total">{{ total }} TL</strong>
+          </div>
+          {% if user.is_authenticated %}
+            <a class="btn btn-primary btn-lg cart-checkout-btn" href="{% url 'cart:checkout' %}">Ödeme adımına geç</a>
+            <p class="muted small cart-summary-note">Ödeme bilgileri bir sonraki adımda alınır.</p>
+          {% else %}
+            <button type="button" class="btn btn-primary btn-lg cart-checkout-btn" id="cart-auth-open">Ödeme Yap</button>
+            <p class="muted small cart-summary-note">Ödeme bilgileri bir sonraki adımda alınır.</p>
+          {% endif %}
+        </div>
+      </aside>
+    </div>
+    <script>
+    (function () {
+      var form = document.getElementById("cart-update-form");
+      if (!form) return;
+      function submitForm() {
+        if (typeof form.requestSubmit === "function") {
+          form.requestSubmit();
+        } else {
+          form.submit();
+        }
+      }
+      form.querySelectorAll(".qty-stepper").forEach(function (stepper) {
+        var inp = stepper.querySelector('input[type="number"][name^="adet_"]');
+        var dec = stepper.querySelector("[data-qty-dec]");
+        var inc = stepper.querySelector("[data-qty-inc]");
+        if (!inp || !dec || !inc) return;
+        var min = parseInt(inp.getAttribute("min"), 10);
+        if (isNaN(min)) min = 0;
+        var max = parseInt(inp.getAttribute("max"), 10);
+        if (isNaN(max)) max = 99;
+        function readVal() {
+          var t = inp.value.trim();
+          if (t === "") return min;
+          var v = parseInt(t, 10);
+          return isNaN(v) ? min : v;
+        }
+        function setVal(n) {
+          n = Math.max(min, Math.min(max, n));
+          inp.value = String(n);
+        }
+        function clampAndSubmit() {
+          var v = readVal();
+          setVal(v);
+          submitForm();
+        }
+        [dec, inc].forEach(function (btn) {
+          btn.addEventListener("mousedown", function (e) {
+            e.preventDefault();
+          });
+        });
+        dec.addEventListener("click", function () {
+          setVal(readVal() - 1);
+          submitForm();
+        });
+        inc.addEventListener("click", function () {
+          setVal(readVal() + 1);
+          submitForm();
+        });
+        inp.addEventListener("input", function () {
+          inp.value = inp.value.replace(/[^\d]/g, "").slice(0, 2);
+        });
+        inp.addEventListener("change", clampAndSubmit);
+        inp.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            clampAndSubmit();
+          }
+        });
+      });
+    })();
+    </script>
+  {% else %}
+    <div class="empty-state panel panel--elevated">
+      <p class="empty-title">Sepetiniz boş</p>
+      <p class="muted">Katalogdan ürün ekleyerek başlayın.</p>
+      <p style="margin-top:1.25rem;"><a class="btn btn-primary btn-lg" href="{% url 'catalog:home' %}#spa-urunler">Ürünlere git</a></p>
+    </div>
+  {% endif %}
+</div>
+
+{% if not user.is_authenticated %}
+<div class="auth-modal" id="cart-auth-modal" hidden>
+  <div class="auth-modal-backdrop" data-auth-close></div>
+  <div class="auth-modal-box" role="dialog" aria-modal="true" aria-labelledby="cart-auth-title">
+    <button type="button" class="auth-modal-close" data-auth-close aria-label="Kapat">&times;</button>
+    <div class="auth-modal-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <h2 class="auth-modal-title" id="cart-auth-title">Siparişi tamamlamak için siteye giriş yapmalısınız!</h2>
+    <div class="auth-modal-actions">
+      <a class="btn btn-primary btn-lg auth-modal-btn" href="{% url 'accounts:login' %}?next={% url 'cart:checkout' %}">Giriş yap</a>
+      <a class="btn btn-secondary btn-lg auth-modal-btn" href="{% url 'accounts:register' %}">Kayıt ol</a>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var modal = document.getElementById("cart-auth-modal");
+  var openBtn = document.getElementById("cart-auth-open");
+  if (!modal || !openBtn) return;
+  function open() {
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+  function close() {
+    modal.hidden = true;
+    document.body.style.overflow = "";
+  }
+  openBtn.addEventListener("click", open);
+  modal.querySelectorAll("[data-auth-close]").forEach(function (el) {
+    el.addEventListener("click", close);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !modal.hidden) close();
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

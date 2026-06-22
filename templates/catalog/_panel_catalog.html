@@ -1,0 +1,122 @@
+<div class="container catalog-page">
+  <header class="catalog-page-head catalog-page-hero">
+    <div>
+      <p class="page-eyebrow">Katalog</p>
+      <h1 class="page-title" id="spa-urunler-heading">Ürünler</h1>
+      <p class="page-desc catalog-page-lead">
+        <span class="catalog-page-lead-row">Kategori filtreleri ve arama ile stoktaki elektrik ve yapı market ürünlerine hızlıca ulaşın.</span>
+        <span class="catalog-page-lead-row">Liste fiyatları sepet önizlemesiyle uyumludur; proje ve partili siparişlerde ekibimizden destek alabilirsiniz.</span>
+      </p>
+    </div>
+  </header>
+
+  <div class="catalog-toolbar" aria-label="Katalog filtre ve arama">
+    <div class="toolbar">
+      <div class="chips chips--toolbar">
+        <a class="chip{% if not current_category %} is-active{% endif %}" href="{% url 'catalog:home' %}?{% if search_query %}q={{ search_query|urlencode }}&amp;{% endif %}{% if min_price %}min={{ min_price|urlencode }}&amp;{% endif %}{% if max_price %}max={{ max_price|urlencode }}&amp;{% endif %}sirala={{ current_sort }}#spa-urunler">Tümü</a>
+        {% for c in categories_all %}
+          <a class="chip{% if current_category == c.slug %} is-active{% endif %}" href="{% url 'catalog:home' %}?kategori={{ c.slug }}{% if search_query %}&amp;q={{ search_query|urlencode }}{% endif %}{% if min_price %}&amp;min={{ min_price|urlencode }}{% endif %}{% if max_price %}&amp;max={{ max_price|urlencode }}{% endif %}&amp;sirala={{ current_sort }}#spa-urunler">{{ c.name }}</a>
+        {% endfor %}
+      </div>
+      <form class="search-form catalog-search-form" method="get" action="{% url 'catalog:home' %}">
+        {% if current_category %}
+          <input type="hidden" name="kategori" value="{{ current_category }}">
+        {% endif %}
+        <input type="hidden" name="sirala" value="{{ current_sort }}">
+        {% if min_price %}<input type="hidden" name="min" value="{{ min_price }}">{% endif %}
+        {% if max_price %}<input type="hidden" name="max" value="{{ max_price }}">{% endif %}
+        <input type="search" name="q" value="{{ search_query }}" placeholder="Ürün veya anahtar kelime ara…" aria-label="Ürün ara">
+        <button type="submit" class="btn btn-primary">Ara</button>
+      </form>
+    </div>
+
+    <form class="catalog-filterbar search-form" method="get" action="{% url 'catalog:home' %}">
+      {% if current_category %}<input type="hidden" name="kategori" value="{{ current_category }}">{% endif %}
+      {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+      <div class="catalog-filter-group">
+        <label class="catalog-filter-label" for="catalog-sort">Sırala</label>
+        <select class="catalog-filter-select" id="catalog-sort" name="sirala" data-autosubmit>
+          {% for key, opt in sort_options.items %}
+            <option value="{{ key }}"{% if current_sort == key %} selected{% endif %}>{{ opt.1 }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="catalog-filter-group catalog-filter-group--price">
+        <label class="catalog-filter-label">Fiyat (TL)</label>
+        <div class="catalog-price-inputs">
+          <input type="number" min="0" step="1" inputmode="numeric" class="catalog-filter-price" name="min" value="{{ min_price }}" placeholder="En az" aria-label="En az fiyat">
+          <span class="catalog-price-sep" aria-hidden="true">–</span>
+          <input type="number" min="0" step="1" inputmode="numeric" class="catalog-filter-price" name="max" value="{{ max_price }}" placeholder="En çok" aria-label="En çok fiyat">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-secondary catalog-filter-apply">Uygula</button>
+    </form>
+  </div>
+
+  <section class="catalog-pillars" aria-label="Alışveriş avantajları">
+    <div class="catalog-pillar">
+      <span class="catalog-pillar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </span>
+      <p class="catalog-pillar-title">Anlık stok</p>
+      <p class="catalog-pillar-desc">Ürün kartında stok durumu net şekilde gösterilir; sepet üst sınırı stokla uyumludur.</p>
+    </div>
+    <div class="catalog-pillar">
+      <span class="catalog-pillar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </span>
+      <p class="catalog-pillar-title">Hızlı filtre</p>
+      <p class="catalog-pillar-desc">Kategori rozetleri ve arama ile ilgili ürünlere tek ekranda odaklanın.</p>
+    </div>
+    <div class="catalog-pillar">
+      <span class="catalog-pillar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </span>
+      <p class="catalog-pillar-title">Kurumsal tedarik</p>
+      <p class="catalog-pillar-desc">Listelenen ürünlerde tutarlı marka ve kalite; talep halinde teklif süreci için iletişim.</p>
+    </div>
+  </section>
+
+  <div class="catalog-products-wrap">
+    <div class="grid-products grid-products--catalog">
+      {% for p in products %}
+        <article class="card">
+          <div class="card-image">
+            <span class="card-badge">{{ p.category.name }}</span>
+            {% include "catalog/_favorite_button.html" with product=p %}
+            <a class="card-image-link" href="{{ p.get_absolute_url }}" aria-label="{{ p.name }} — ürün detayı">
+              {% if p.image %}
+                <img src="{{ p.image.url }}" alt="">
+              {% else %}
+                <div class="placeholder-thumb">Görsel yok</div>
+              {% endif %}
+            </a>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title"><a href="{{ p.get_absolute_url }}">{{ p.name }}</a></h2>
+            <p class="card-meta muted small">{{ p.category.name }}</p>
+            <p class="price"><span class="price-value">{{ p.price }}</span> <span class="price-currency">TL</span></p>
+            {% include "catalog/_stock_line.html" with product=p %}
+          </div>
+        </article>
+      {% empty %}
+        <div class="empty-state empty-state--wide">
+          <p class="empty-title">Sonuç bulunamadı</p>
+          <p class="muted">Farklı bir arama deneyin veya kategoriyi sıfırlayın.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="catalog-cta catalog-cta--bar">
+    <div class="catalog-cta-copy">
+      <p class="catalog-cta-title">Teklif veya keşif</p>
+      <p class="catalog-cta-sub">Ürün dışı ihtiyaçlar ve saha hizmetleri için ekibimizle görüşebilirsiniz.</p>
+    </div>
+    <p class="catalog-cta-actions">
+      <a class="btn btn-primary spa-nav" href="{% url 'catalog:home' %}#spa-iletisim" data-spa-panel="iletisim">İletişim</a>
+      <a class="btn btn-secondary spa-nav" href="{% url 'catalog:home' %}#spa-hizmetlerimiz" data-spa-panel="hizmetlerimiz">Hizmetlerimiz</a>
+      <a class="btn btn-secondary spa-nav" href="{% url 'catalog:home' %}#spa-ana" data-spa-panel="ana">Ana sayfa</a>
+    </p>
+  </div>
+</div>

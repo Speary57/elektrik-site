@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Hakkımızda — Kılağuz Elektrik ve Yapı Market{% endblock %}
+
+{% block content %}
+<div class="container about-page">
+  <header class="about-page-head about-page-hero" aria-labelledby="about-heading">
+    <div>
+      <p class="page-eyebrow">Kurumsal</p>
+      <h1 class="page-title" id="about-heading">Hakkımızda</h1>
+      <p class="page-desc about-page-lead">
+        <span class="about-page-lead-row">Elektrik ve yapı markette güvenilir çözüm ortağınız.</span>
+      </p>
+    </div>
+  </header>
+
+  <ul class="about-values" aria-label="İş ilkeleri">
+    <li class="about-value about-value--quality">
+      <span class="about-value-icon" aria-hidden="true"></span>
+      <p class="about-value-name">Kalite</p>
+      <p class="about-value-desc">Ürün ve hizmette tutarlı standart</p>
+    </li>
+    <li class="about-value about-value--trust">
+      <span class="about-value-icon" aria-hidden="true"></span>
+      <p class="about-value-name">Güven</p>
+      <p class="about-value-desc">Müşteri memnuniyeti önceliğimiz</p>
+    </li>
+    <li class="about-value about-value--tech">
+      <span class="about-value-icon" aria-hidden="true"></span>
+      <p class="about-value-name">Teknoloji</p>
+      <p class="about-value-desc">Operasyonel süreçlerde güncel altyapı</p>
+    </li>
+  </ul>
+
+  <div class="about-layout">
+    <div class="about-main">
+      <article class="about-article-card">
+        <header class="about-article-card-head">
+          <span class="about-article-num" aria-hidden="true">01</span>
+          <h2 class="about-article-title" id="about-s1">Kurumsal yaklaşım</h2>
+        </header>
+        <div class="about-article-body">
+          <p>
+            Elektrik firması olarak; elektrik ürünleri, yapı market çözümleri ve teknik ihtiyaçlar alanında kaliteli hizmet sunmayı hedeflemekteyiz. Müşteri memnuniyetini ön planda tutarak güvenilir, hızlı ve modern çözümler sağlamayı amaçlıyoruz.
+          </p>
+        </div>
+      </article>
+
+      <article class="about-article-card">
+        <header class="about-article-card-head">
+          <span class="about-article-num" aria-hidden="true">02</span>
+          <h2 class="about-article-title" id="about-s2">Hizmet kapsamı</h2>
+        </header>
+        <div class="about-article-body">
+          <p>
+            Sitemiz üzerinden aydınlatma ürünleri, kablo çeşitleri, tamirat ve tadilat ekipmanları gibi birçok ürüne kolayca ulaşabilirsiniz. Ürünlerimizi detaylı şekilde inceleyebilir, ihtiyaçlarınıza uygun seçenekleri değerlendirebilir ve güvenli şekilde sipariş oluşturabilirsiniz.
+          </p>
+        </div>
+      </article>
+
+      <article class="about-article-card">
+        <header class="about-article-card-head">
+          <span class="about-article-num" aria-hidden="true">03</span>
+          <h2 class="about-article-title" id="about-s3">Operasyon</h2>
+        </header>
+        <div class="about-article-body">
+          <p>
+            Teknolojiyi yakından takip eden yapımız sayesinde hem kullanıcı dostu bir alışveriş deneyimi sunuyor hem de ürün yönetimi, stok takibi ve sipariş süreçlerini modern sistemlerle yönetiyoruz.
+          </p>
+        </div>
+      </article>
+    </div>
+
+    <aside class="about-aside" aria-label="Özet ve bağlantılar">
+      <article class="about-article-card about-commit-card" role="note">
+        <header class="about-article-card-head">
+          <span class="about-article-num" aria-hidden="true">✓</span>
+          <h2 class="about-article-title">Taahhüdümüz</h2>
+        </header>
+        <div class="about-article-body">
+          <p>
+            Kaliteli ürün, uygun fiyat ve güvenilir hizmet anlayışıyla sizlere en iyi deneyimi sunmak için çalışıyoruz.
+          </p>
+        </div>
+      </article>
+      <div class="about-aside-links">
+        <p class="about-aside-links-label">Devam edin</p>
+        <a class="about-aside-link" href="{% url 'catalog:product_list' %}">
+          <span>Ürün kataloğu</span>
+          <span class="about-aside-link-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="about-aside-link about-aside-link--muted" href="{% url 'catalog:home' %}">
+          <span>Ana sayfa</span>
+          <span class="about-aside-link-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

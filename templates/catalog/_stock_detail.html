@@ -1,0 +1,13 @@
+{# product: Product — detay üst bilgi #}
+<div class="stock-detail {% if product.stock_quantity == 0 %}is-out{% elif product.stock_quantity <= 5 %}is-low{% endif %}">
+  {% if product.stock_quantity == 0 %}
+    <span class="stock-detail-label">Güncel stok</span>
+    <span class="stock-detail-value stock-detail-value--out">Tükendi</span>
+  {% else %}
+    <span class="stock-detail-label">Güncel stok</span>
+    <span class="stock-detail-value"><strong>{{ product.stock_quantity }}</strong> adet</span>
+    {% if product.stock_quantity <= 5 %}
+      <span class="stock-detail-hint muted small">Azalan stok</span>
+    {% endif %}
+  {% endif %}
+</div>

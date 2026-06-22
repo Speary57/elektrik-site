@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Kayıt ol — Kılağuz Elektrik ve Yapı Market{% endblock %}
+
+{% block content %}
+<div class="container auth-page">
+  <div class="auth-card panel panel--elevated">
+    <header class="auth-head">
+      <p class="page-eyebrow">Hesap</p>
+      <h1 class="auth-title">Kayıt ol</h1>
+      <p class="auth-sub">Birkaç adımda ücretsiz hesabınızı oluşturun.</p>
+    </header>
+
+    {% if form.non_field_errors %}
+      <div class="auth-alert" role="alert">
+        {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'accounts:register' %}" novalidate class="auth-form">
+      {% csrf_token %}
+
+      <div class="auth-field">
+        <label class="auth-label" for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
+        {{ form.full_name }}
+        {% if form.full_name.errors %}<p class="auth-error">{{ form.full_name.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+        {{ form.email }}
+        {% if form.email.errors %}<p class="auth-error">{{ form.email.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label" for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+        {{ form.phone }}
+        {% if form.phone.errors %}<p class="auth-error">{{ form.phone.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label" for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+        <div class="auth-pass-wrap">
+          {{ form.password1 }}
+          <button type="button" class="auth-pass-toggle" data-target="{{ form.password1.id_for_label }}" aria-label="Parolayı göster" aria-pressed="false">
+            <svg class="auth-eye auth-eye--closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12c2.4 3.6 6 5.6 10 5.6S19.6 15.6 22 12"/><line x1="3.6" y1="15" x2="2.6" y2="17.2"/><line x1="7.8" y1="16.9" x2="7.2" y2="19.4"/><line x1="12" y1="17.6" x2="12" y2="20.2"/><line x1="16.2" y1="16.9" x2="16.8" y2="19.4"/><line x1="20.4" y1="15" x2="21.4" y2="17.2"/></svg>
+            <svg class="auth-eye auth-eye--open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        {% if form.password1.errors %}
+          <p class="auth-error">{{ form.password1.errors.0 }}</p>
+        {% else %}
+          <p class="auth-hint">En az 8 karakter; çok yaygın veya tamamen sayısal parolalar kabul edilmez.</p>
+        {% endif %}
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label" for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+        <div class="auth-pass-wrap">
+          {{ form.password2 }}
+          <button type="button" class="auth-pass-toggle" data-target="{{ form.password2.id_for_label }}" aria-label="Parolayı göster" aria-pressed="false">
+            <svg class="auth-eye auth-eye--closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12c2.4 3.6 6 5.6 10 5.6S19.6 15.6 22 12"/><line x1="3.6" y1="15" x2="2.6" y2="17.2"/><line x1="7.8" y1="16.9" x2="7.2" y2="19.4"/><line x1="12" y1="17.6" x2="12" y2="20.2"/><line x1="16.2" y1="16.9" x2="16.8" y2="19.4"/><line x1="20.4" y1="15" x2="21.4" y2="17.2"/></svg>
+            <svg class="auth-eye auth-eye--open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        {% if form.password2.errors %}<p class="auth-error">{{ form.password2.errors.0 }}</p>{% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg auth-submit">Hesap oluştur</button>
+    </form>
+
+    <script>
+    (function () {
+      // Parola göster / gizle
+      document.querySelectorAll(".auth-pass-toggle").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var input = document.getElementById(btn.dataset.target);
+          if (!input) return;
+          var show = input.type === "password";
+          input.type = show ? "text" : "password";
+          btn.classList.toggle("is-on", show);
+          btn.setAttribute("aria-pressed", show ? "true" : "false");
+          btn.setAttribute("aria-label", show ? "Parolayı gizle" : "Parolayı göster");
+        });
+      });
+
+      // Ad soyad: yalnızca harf (Türkçe dâhil) + boşluk; her kelime büyük harfle başlar
+      var name = document.getElementById("{{ form.full_name.id_for_label }}");
+      if (name) {
+        name.addEventListener("input", function () {
+          var caret = name.selectionStart;
+          var cleaned = name.value.replace(/[^\p{L}\s]/gu, "");
+          cleaned = cleaned.replace(/(^|\s)(\p{L})/gu, function (m, sep, ch) {
+            return sep + ch.toLocaleUpperCase("tr-TR");
+          });
+          if (cleaned !== name.value) {
+            name.value = cleaned;
+            try {
+              name.setSelectionRange(caret, caret);
+            } catch (e) {}
+          }
+        });
+      }
+
+      // Telefon: 05-- --- -- -- (4-3-2-2), yalnızca rakam, en fazla 11 hane
+      var phone = document.getElementById("{{ form.phone.id_for_label }}");
+      if (phone) {
+        var formatPhone = function (value) {
+          var d = value.replace(/\D+/g, "").slice(0, 11);
+          var out = d.slice(0, 4);
+          if (d.length > 4) out += " " + d.slice(4, 7);
+          if (d.length > 7) out += " " + d.slice(7, 9);
+          if (d.length > 9) out += " " + d.slice(9, 11);
+          return out;
+        };
+        phone.value = formatPhone(phone.value);
+        phone.addEventListener("input", function () {
+          phone.value = formatPhone(phone.value);
+        });
+      }
+
+      // Caps Lock uyarı baloncuğu
+      document.querySelectorAll(".auth-pass-wrap").forEach(function (wrap) {
+        var input = wrap.querySelector("input");
+        if (!input) return;
+        var hint = document.createElement("span");
+        hint.className = "auth-caps-hint";
+        hint.setAttribute("aria-hidden", "true");
+        hint.innerHTML = '<span class="auth-caps-icon" aria-hidden="true">A</span> Caps Lock açık';
+        wrap.appendChild(hint);
+        function update(e) {
+          var on =
+            e &&
+            typeof e.getModifierState === "function" &&
+            e.getModifierState("CapsLock");
+          wrap.classList.toggle("caps-on", !!on);
+        }
+        input.addEventListener("keydown", update);
+        input.addEventListener("keyup", update);
+        input.addEventListener("blur", function () {
+          wrap.classList.remove("caps-on");
+        });
+      });
+    })();
+    </script>
+
+    <p class="auth-switch">
+      Zaten hesabınız var mı? <a href="{% url 'accounts:login' %}">Giriş yapın</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

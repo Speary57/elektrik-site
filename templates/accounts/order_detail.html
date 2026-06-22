@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Sipariş {{ order.order_number }} — Kılağuz Elektrik ve Yapı Market{% endblock %}
+
+{% block content %}
+<div class="container account-page">
+  <header class="account-head">
+    <p class="page-eyebrow"><a class="account-back" href="{% url 'accounts:orders' %}">← Tüm siparişlerim</a></p>
+    <h1 class="account-title">Sipariş {{ order.order_number }}</h1>
+    <p class="account-sub muted">{{ order.created_at|date:"d.m.Y H:i" }}</p>
+  </header>
+
+  <div class="order-detail-status-row">
+    <span class="order-status order-status--{{ order.status }}" id="order-status-badge">{{ order.get_status_display }}</span>
+    <span class="muted">Ödeme: {{ order.get_payment_status_display }}</span>
+  </div>
+
+  <section class="account-card panel panel--elevated">
+    <h2 class="account-card-title">Ürünler</h2>
+    <ul class="order-items-list">
+      {% for item in order.items.all %}
+        <li class="order-items-row">
+          <span class="order-items-qty">{{ item.quantity }}×</span>
+          <span class="order-items-name">{{ item.product_name }}</span>
+          <span class="order-items-total">{{ item.line_total }} TL</span>
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="order-totals">
+      <div class="order-totals-row order-totals-row--total"><span>Genel toplam</span><strong>{{ order.total }} TL</strong></div>
+    </div>
+  </section>
+
+  <section class="account-card panel panel--elevated">
+    <h2 class="account-card-title">Teslimat bilgileri</h2>
+    <p class="order-delivery-line"><strong>{{ order.full_name }}</strong></p>
+    <p class="order-delivery-line">{{ order.phone }}</p>
+    <p class="order-delivery-line">{{ order.email }}</p>
+    <p class="order-delivery-line">{{ order.address }}, {{ order.district }} / {{ order.city }}</p>
+    {% if order.note %}<p class="order-delivery-note muted">Sipariş notu: {{ order.note }}</p>{% endif %}
+  </section>
+
+  <div id="order-cancel-area">
+  {% if order.can_cancel %}
+    <form method="post" action="{% url 'accounts:order_cancel' order.order_number %}"
+          class="order-cancel-form"
+          data-ajax
+          data-confirm="Siparişinizi iptal etmek istediğinize emin misiniz? İptal edilen ürünler stoğa geri eklenir."
+          data-confirm-title="Siparişi iptal et"
+          data-confirm-ok="Evet, iptal et"
+          data-confirm-cancel="Vazgeç"
+          data-confirm-danger>
+      {% csrf_token %}
+      <button type="submit" class="order-cancel-btn">Siparişi iptal et</button>
+    </form>
+  {% elif order.status == 'cancelled_by_user' %}
+    <p class="order-cancel-note">Bu sipariş tarafınızdan iptal edildi.</p>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}

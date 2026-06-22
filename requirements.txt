@@ -1,0 +1,8 @@
+Django>=5.0,<6
+certifi>=2024.0.0
+python-dotenv>=1.0.0
+reportlab>=4.0.0
+# PDF fatura (MSYS2 Python ile Django çalışıyorsa):
+#   python -m pip install reportlab --no-deps
+#   pacman -S mingw-w64-ucrt-x86_64-python-pillow
+# Örnek ürün görselleri için (isteğe bağlı): pip install Pillow

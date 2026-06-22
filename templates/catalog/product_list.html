@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Ürünler — Kılağuz Elektrik ve Yapı Market{% endblock %}
+
+{% block content %}
+<div class="container">
+  <header class="page-head">
+    <div>
+      <p class="page-eyebrow">Katalog</p>
+      <h1 class="page-title">Ürünler</h1>
+      <p class="page-desc muted">Kategori ve arama ile ürünlerinize ulaşın.</p>
+    </div>
+  </header>
+
+  <div class="panel panel--toolbar">
+    <div class="toolbar">
+      <div class="chips chips--toolbar">
+        <a class="chip{% if not current_category %} is-active{% endif %}" href="{% url 'catalog:product_list' %}">Tümü</a>
+        {% for c in categories %}
+          <a class="chip{% if current_category == c.slug %} is-active{% endif %}" href="{% url 'catalog:product_list' %}?kategori={{ c.slug }}">{{ c.name }}</a>
+        {% endfor %}
+      </div>
+      <form class="search-form" method="get" action="{% url 'catalog:product_list' %}">
+        {% if current_category %}
+          <input type="hidden" name="kategori" value="{{ current_category }}">
+        {% endif %}
+        <input type="search" name="q" value="{{ search_query }}" placeholder="Ürün veya anahtar kelime ara…" aria-label="Ürün ara">
+        <button type="submit" class="btn btn-primary">Ara</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="grid-products grid-products--catalog">
+    {% for p in products %}
+      <article class="card">
+        <div class="card-image">
+          <span class="card-badge">{{ p.category.name }}</span>
+          <a class="card-image-link" href="{{ p.get_absolute_url }}" aria-label="{{ p.name }} — ürün detayı">
+            {% if p.image %}
+              <img src="{{ p.image.url }}" alt="">
+            {% else %}
+              <div class="placeholder-thumb">Görsel yok</div>
+            {% endif %}
+          </a>
+        </div>
+        <div class="card-body">
+          <h2 class="card-title"><a href="{{ p.get_absolute_url }}">{{ p.name }}</a></h2>
+          <p class="card-meta muted small">{{ p.category.name }}</p>
+          <p class="price"><span class="price-value">{{ p.price }}</span> <span class="price-currency">TL</span></p>
+          {% include "catalog/_stock_line.html" with product=p %}
+        </div>
+      </article>
+    {% empty %}
+      <div class="empty-state empty-state--wide">
+        <p class="empty-title">Sonuç bulunamadı</p>
+        <p class="muted">Farklı bir arama deneyin veya kategoriyi sıfırlayın.</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

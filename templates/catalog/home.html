@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Kılağuz Elektrik ve Yapı Market{% endblock %}
+
+{% block main_class %}main main--spa{% endblock %}
+
+{% block content %}
+<script>
+  /* Dış sayfadan (#spa-*) gelindiğinde tarayıcının hash kaydırmasını engelle */
+  (function () {
+    if (!location.hash || location.hash.indexOf("#spa-") !== 0) return;
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    window.scrollTo(0, 0);
+  })();
+</script>
+<div class="spa-viewport" id="spa-viewport" aria-label="Sayfa bölümleri">
+  <div class="spa-track" id="spa-track">
+    <section
+      id="spa-ana"
+      class="spa-panel"
+      role="region"
+      aria-roledescription="slide"
+      aria-labelledby="spa-ana-heading"
+      tabindex="-1"
+    >
+      <div class="container">
+        <section class="hero">
+          <div class="hero-grid">
+            <div class="hero-copy">
+              <p class="hero-eyebrow">Kılağuz Elektrik ve Yapı Market</p>
+              <h1 class="hero-title" id="spa-ana-heading">Tesisattan yapı marketine tek adres</h1>
+              <p class="hero-lead">Kablo, priz, aydınlatma ve yapı malzemelerinde geniş stok. Aşağıdaki ürünlerle sepet deneyimini hemen test edebilirsiniz.</p>
+              <div class="hero-actions">
+                <a class="btn btn-primary btn-lg spa-nav" href="{% url 'catalog:home' %}#spa-urunler" data-spa-panel="urunler">Kataloğu aç</a>
+                <a class="btn btn-secondary btn-lg" href="{% url 'cart:detail' %}">Sepetime git</a>
+              </div>
+            </div>
+            <div class="hero-aside">
+              <ul class="hero-points">
+                <li class="hero-point">
+                  <span class="hero-point-title">Kurumsal yaklaşım</span>
+                  <span class="hero-point-desc muted">Elektrik ve yapıda tutarlı ürün seçimi</span>
+                </li>
+                <li class="hero-point">
+                  <span class="hero-point-title">Şeffaf fiyat</span>
+                  <span class="hero-point-desc muted">Listelenen fiyatlarla sepet önizlemesi</span>
+                </li>
+                <li class="hero-point">
+                  <span class="hero-point-title">Gelişen katalog</span>
+                  <span class="hero-point-desc muted">Yeni ürünler düzenli eklenir</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="section home-search" aria-labelledby="home-search-title">
+          <div class="home-search-panel panel panel--toolbar">
+            <h2 id="home-search-title" class="home-search-title">Malzeme ara</h2>
+            <p class="home-search-lead muted">Ürün adı veya açıklamada arayın; sonuçlar ürünler bölümünde listelenir.</p>
+            <form class="search-form home-search-form" method="get" action="{% url 'catalog:home' %}" role="search">
+              <input
+                type="search"
+                name="q"
+                placeholder="Örn. kablo, priz, LED, anahtar…"
+                aria-label="Malzeme veya ürün ara"
+                autocomplete="off"
+              >
+              <button type="submit" class="btn btn-primary home-search-submit">Ara</button>
+            </form>
+          </div>
+        </section>
+
+        {% if categories %}
+        <section class="section">
+          <header class="section-head">
+            <h2 class="section-title">Kategoriler</h2>
+            <p class="section-sub muted">İhtiyacınıza göre filtreleyin</p>
+          </header>
+          <div class="chips chips--lg">
+            {% for c in categories %}
+              <a class="chip" href="{% url 'catalog:home' %}?kategori={{ c.slug }}#spa-urunler">{{ c.name }}</a>
+            {% endfor %}
+          </div>
+        </section>
+        {% endif %}
+
+        <section class="section section--flush">
+          <header class="section-head">
+            <h2 class="section-title">Öne çıkan ürünler</h2>
+            <a class="section-link spa-nav" href="{% url 'catalog:home' %}#spa-urunler" data-spa-panel="urunler">Tümünü gör →</a>
+          </header>
+          <div class="grid-products">
+            {% for p in featured_products %}
+              <article class="card">
+                <div class="card-image">
+                  <span class="card-badge">{{ p.category.name }}</span>
+                  <a class="card-image-link" href="{{ p.get_absolute_url }}" aria-label="{{ p.name }} — ürün detayı">
+                    {% if p.image %}
+                      <img src="{{ p.image.url }}" alt="">
+                    {% else %}
+                      <div class="placeholder-thumb">Görsel yok</div>
+                    {% endif %}
+                  </a>
+                </div>
+                <div class="card-body">
+                  <h3 class="card-title"><a href="{{ p.get_absolute_url }}">{{ p.name }}</a></h3>
+                  <p class="card-meta muted small">{{ p.category.name }}</p>
+                  <p class="price"><span class="price-value">{{ p.price }}</span> <span class="price-currency">TL</span></p>
+                  {% include "catalog/_stock_line.html" with product=p %}
+                </div>
+              </article>
+            {% empty %}
+              <p class="muted panel panel--soft">Henüz ürün yok. Yönetim panelinden ekleyin veya terminalde <code>python manage.py seed_demo</code> çalıştırın.</p>
+            {% endfor %}
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section
+      id="spa-hakkimizda"
+      class="spa-panel"
+      role="region"
+      aria-roledescription="slide"
+      aria-labelledby="about-heading"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      {% include "catalog/_panel_about.html" %}
+    </section>
+
+    <section
+      id="spa-urunler"
+      class="spa-panel"
+      role="region"
+      aria-roledescription="slide"
+      aria-labelledby="spa-urunler-heading"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      {% include "catalog/_panel_catalog.html" %}
+    </section>
+
+    <section
+      id="spa-hizmetlerimiz"
+      class="spa-panel"
+      role="region"
+      aria-roledescription="slide"
+      aria-labelledby="spa-hizmetlerimiz-heading"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      {% include "catalog/_panel_hizmetler.html" %}
+    </section>
+
+    <section
+      id="spa-iletisim"
+      class="spa-panel"
+      role="region"
+      aria-roledescription="slide"
+      aria-labelledby="spa-iletisim-heading"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      {% include "catalog/_panel_iletisim.html" %}
+    </section>
+  </div>
+</div>
+{% include "catalog/_iletisim_kvkk_dialog.html" %}
+<script src="{% static 'js/contact-form.js' %}" defer></script>
+<script src="{% static 'js/spa-panels.js' %}" defer></script>
+{% endblock %}
