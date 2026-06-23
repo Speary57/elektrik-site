@@ -124,8 +124,8 @@ def _mask_email(email):
     return f"{masked}@{domain}"
 
 
-def _send_admin_code(request, user):
-    """Yeni bir doğrulama kodu üretir, oturuma (hash) kaydeder ve e-posta gönderir."""
+def _prepare_admin_code(request, user):
+    """Doğrulama kodunu üretir ve oturuma kaydeder."""
     code = f"{secrets.randbelow(1000000):06d}"
     ttl = getattr(settings, "ADMIN_OTP_CODE_TTL", 600)
     request.session[_OTP_HASH] = make_password(code)
@@ -134,7 +134,15 @@ def _send_admin_code(request, user):
     request.session[_OTP_UID] = user.pk
     request.session[_OTP_EMAIL] = user.email
     request.session[_OTP_SENT] = True
-    return order_emails.send_admin_verification_code(user, code)
+    request.session.modified = True
+    return code
+
+
+def _send_admin_code(request, user):
+    """Kodu hazırlar; e-postayı arka planda gönderir (sayfa hemen açılır)."""
+    code = _prepare_admin_code(request, user)
+    order_emails.send_admin_verification_code(user, code)
+    return True
 
 
 def _admin_verify_context(request, user, next_url):
@@ -179,14 +187,12 @@ def admin_verify(request):
     if request.method == "POST":
         action = request.POST.get("action")
         if action == "resend":
-            if _send_admin_code(request, user):
-                messages.success(request, "Yeni bir doğrulama kodu e-postanıza gönderildi.")
-            else:
-                messages.error(
-                    request,
-                    "Doğrulama kodu gönderilemedi. E-posta ayarlarını kontrol edin "
-                    "veya spam klasörüne bakın.",
-                )
+            _send_admin_code(request, user)
+            messages.success(
+                request,
+                "Yeni bir doğrulama kodu e-postanıza gönderiliyor. Birkaç saniye içinde "
+                "gelmezse spam klasörünü kontrol edin.",
+            )
             return redirect(f"{request.path}?next={next_url}")
 
         code = (request.POST.get("code") or "").strip()
@@ -234,12 +240,7 @@ def admin_verify(request):
     # GET: yalnızca bu doğrulama için hiç kod gönderilmediyse ilk kodu gönder.
     # Süre dolduğunda otomatik tekrar gönderim YOK; kullanıcı "Yeni kod gönder"e basmalı.
     if not request.session.get(_OTP_SENT):
-        if not _send_admin_code(request, user):
-            messages.error(
-                request,
-                "Doğrulama kodu gönderilemedi. Sunucuda EMAIL_HOST_USER ve "
-                "EMAIL_HOST_PASSWORD ayarlı olmalıdır (Gmail uygulama şifresi).",
-            )
+        _send_admin_code(request, user)
 
     return render(
         request,

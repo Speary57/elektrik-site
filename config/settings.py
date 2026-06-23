@@ -84,6 +84,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+        "OPTIONS": {
+            "timeout": 20,
+        },
     }
 }
 
@@ -104,7 +107,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
 
 MEDIA_URL = "media/"
@@ -126,6 +129,7 @@ EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "10"))
 
 if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
     EMAIL_BACKEND = "config.email_backend.EmailBackend"
@@ -152,6 +156,12 @@ ADMIN_URL_PREFIX = "/yonetim/"
 ADMIN_OTP_CODE_TTL = 10 * 60          # Kodun geçerlilik süresi (saniye): 10 dk
 ADMIN_OTP_SESSION_TTL = 8 * 60 * 60   # Doğrulamadan sonra panel erişimi: 8 saat
 ADMIN_OTP_MAX_ATTEMPTS = 5            # Yanlış kod deneme sınırı
+
+# Render / ters vekil (HTTPS) ayarları
+if os.environ.get("RENDER") or os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # E-posta gönderimi arka planda olduğundan, sonuçların (başarı/hata) sunucu
 # terminalinde görünmesi için loglama. Sorun ayıklamayı kolaylaştırır.

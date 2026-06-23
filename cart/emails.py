@@ -404,8 +404,8 @@ def send_admin_verification_code(user, code):
         f"{greeting} yönetim paneline güvenli giriş için doğrulama kodunuzu aşağıda bulabilirsiniz.",
         inner,
     )
-    # Render/gunicorn ortamında arka plan iş parçacığı istek bitmeden sonlanabiliyor.
-    return _send_sync(subject, text_body, html_body, [email])
+    _send_async(subject, text_body, html_body, [email])
+    return True
 
 
 def send_low_stock_alert(product, product_url=""):
