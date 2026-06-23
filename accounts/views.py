@@ -134,7 +134,20 @@ def _send_admin_code(request, user):
     request.session[_OTP_UID] = user.pk
     request.session[_OTP_EMAIL] = user.email
     request.session[_OTP_SENT] = True
-    order_emails.send_admin_verification_code(user, code)
+    return order_emails.send_admin_verification_code(user, code)
+
+
+def _admin_verify_context(request, user, next_url):
+    email_configured = (
+        settings.EMAIL_HOST_USER
+        and settings.EMAIL_HOST_PASSWORD
+        and settings.EMAIL_BACKEND != "django.core.mail.backends.console.EmailBackend"
+    )
+    return {
+        "masked_email": _mask_email(user.email),
+        "next": next_url,
+        "email_configured": email_configured,
+    }
 
 
 def _has_valid_pending(request, user):
@@ -166,8 +179,14 @@ def admin_verify(request):
     if request.method == "POST":
         action = request.POST.get("action")
         if action == "resend":
-            _send_admin_code(request, user)
-            messages.success(request, "Yeni bir doğrulama kodu e-postanıza gönderildi.")
+            if _send_admin_code(request, user):
+                messages.success(request, "Yeni bir doğrulama kodu e-postanıza gönderildi.")
+            else:
+                messages.error(
+                    request,
+                    "Doğrulama kodu gönderilemedi. E-posta ayarlarını kontrol edin "
+                    "veya spam klasörüne bakın.",
+                )
             return redirect(f"{request.path}?next={next_url}")
 
         code = (request.POST.get("code") or "").strip()
@@ -179,7 +198,7 @@ def admin_verify(request):
             return render(
                 request,
                 "registration/admin_verify.html",
-                {"masked_email": _mask_email(user.email), "next": next_url},
+                _admin_verify_context(request, user, next_url),
             )
 
         max_attempts = getattr(settings, "ADMIN_OTP_MAX_ATTEMPTS", 5)
@@ -209,18 +228,23 @@ def admin_verify(request):
         return render(
             request,
             "registration/admin_verify.html",
-            {"masked_email": _mask_email(user.email), "next": next_url},
+            _admin_verify_context(request, user, next_url),
         )
 
     # GET: yalnızca bu doğrulama için hiç kod gönderilmediyse ilk kodu gönder.
     # Süre dolduğunda otomatik tekrar gönderim YOK; kullanıcı "Yeni kod gönder"e basmalı.
     if not request.session.get(_OTP_SENT):
-        _send_admin_code(request, user)
+        if not _send_admin_code(request, user):
+            messages.error(
+                request,
+                "Doğrulama kodu gönderilemedi. Sunucuda EMAIL_HOST_USER ve "
+                "EMAIL_HOST_PASSWORD ayarlı olmalıdır (Gmail uygulama şifresi).",
+            )
 
     return render(
         request,
         "registration/admin_verify.html",
-        {"masked_email": _mask_email(user.email), "next": next_url},
+        _admin_verify_context(request, user, next_url),
     )
 
 
