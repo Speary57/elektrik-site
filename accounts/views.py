@@ -1,3 +1,4 @@
+import os
 import secrets
 import time
 
@@ -139,22 +140,27 @@ def _prepare_admin_code(request, user):
 
 
 def _send_admin_code(request, user):
-    """Kodu hazırlar; e-postayı arka planda gönderir (sayfa hemen açılır)."""
+    """Kodu hazırlar; e-postayı gönderir."""
     code = _prepare_admin_code(request, user)
-    order_emails.send_admin_verification_code(user, code)
-    return True
+    return order_emails.send_admin_verification_code(user, code)
 
 
 def _admin_verify_context(request, user, next_url):
-    email_configured = (
+    on_render = bool(
+        os.environ.get("RENDER") or os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+    )
+    uses_resend = bool(getattr(settings, "RESEND_API_KEY", ""))
+    email_configured = uses_resend or (
         settings.EMAIL_HOST_USER
         and settings.EMAIL_HOST_PASSWORD
         and settings.EMAIL_BACKEND != "django.core.mail.backends.console.EmailBackend"
     )
+    smtp_blocked = on_render and not uses_resend
     return {
         "masked_email": _mask_email(user.email),
         "next": next_url,
         "email_configured": email_configured,
+        "smtp_blocked_on_render": smtp_blocked,
     }
 
 
@@ -187,12 +193,16 @@ def admin_verify(request):
     if request.method == "POST":
         action = request.POST.get("action")
         if action == "resend":
-            _send_admin_code(request, user)
-            messages.success(
-                request,
-                "Yeni bir doğrulama kodu e-postanıza gönderiliyor. Birkaç saniye içinde "
-                "gelmezse spam klasörünü kontrol edin.",
-            )
+            if _send_admin_code(request, user):
+                messages.success(
+                    request,
+                    "Yeni bir doğrulama kodu e-postanıza gönderildi.",
+                )
+            else:
+                messages.error(
+                    request,
+                    "Doğrulama kodu gönderilemedi. Render'da RESEND_API_KEY gerekir.",
+                )
             return redirect(f"{request.path}?next={next_url}")
 
         code = (request.POST.get("code") or "").strip()
@@ -240,7 +250,12 @@ def admin_verify(request):
     # GET: yalnızca bu doğrulama için hiç kod gönderilmediyse ilk kodu gönder.
     # Süre dolduğunda otomatik tekrar gönderim YOK; kullanıcı "Yeni kod gönder"e basmalı.
     if not request.session.get(_OTP_SENT):
-        _send_admin_code(request, user)
+        if not _send_admin_code(request, user):
+            messages.error(
+                request,
+                "Doğrulama kodu gönderilemedi. Render'da Gmail SMTP çalışmaz; "
+                "RESEND_API_KEY ekleyin (resend.com).",
+            )
 
     return render(
         request,

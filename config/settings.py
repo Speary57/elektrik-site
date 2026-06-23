@@ -131,13 +131,19 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "10"))
 
-if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+
+# Render ücretsiz planda SMTP (587) engellenir; Resend HTTP API kullanın.
+if RESEND_API_KEY:
+    EMAIL_BACKEND = "config.resend_backend.ResendEmailBackend"
+elif EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
     EMAIL_BACKEND = "config.email_backend.EmailBackend"
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 DEFAULT_FROM_EMAIL = os.environ.get(
-    "DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "no-reply@kilaguzelektrik.local"
+    "DEFAULT_FROM_EMAIL",
+    EMAIL_HOST_USER or "onboarding@resend.dev",
 )
 
 # Sipariş bildirimlerinin gönderileceği adres

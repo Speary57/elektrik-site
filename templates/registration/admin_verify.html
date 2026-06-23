@@ -19,7 +19,12 @@
       {% else %}
         <p class="auth-sub av-sub">Güvenliğiniz için 6 haneli tek kullanımlık bir doğrulama kodu gönderdik:</p>
         <p class="av-email">{{ masked_email }}</p>
-        {% if not email_configured %}
+        {% if smtp_blocked_on_render %}
+        <p class="av-hint" style="color:#b45309;margin-top:12px;">
+          Render ücretsiz planda Gmail SMTP çalışmaz. Render ortam değişkenlerine
+          <strong>RESEND_API_KEY</strong> ekleyin (ücretsiz: resend.com).
+        </p>
+        {% elif not email_configured %}
         <p class="av-hint" style="color:#b45309;margin-top:12px;">
           E-posta sunucusu yapılandırılmamış. Render ortam değişkenlerine
           <strong>EMAIL_HOST_USER</strong> ve <strong>EMAIL_HOST_PASSWORD</strong>
