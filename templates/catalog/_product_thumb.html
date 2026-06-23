@@ -1,0 +1,5 @@
+{% if product.has_display_image %}
+  <img src="{{ product.display_image_url }}" alt="{{ alt|default:product.name }}">
+{% else %}
+  <div class="placeholder-thumb"{% if placeholder_style %} style="{{ placeholder_style }}"{% endif %}>Görsel yok</div>
+{% endif %}

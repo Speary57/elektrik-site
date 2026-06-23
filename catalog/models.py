@@ -47,7 +47,18 @@ class Product(models.Model):
         default=0,
         help_text="Sitede gösterilir; sepette bu adedin üzerine çıkılamaz.",
     )
-    image = models.FileField("Fotoğraf", upload_to="urunler/%Y/%m/", blank=True)
+    image = models.FileField(
+        "Özel fotoğraf yükle",
+        upload_to="urunler/%Y/%m/",
+        blank=True,
+        help_text="İsteğe bağlı. Yüklerseniz galeri seçiminin üzerine yazar.",
+    )
+    gallery_image = models.CharField(
+        "Katalog fotoğrafı",
+        max_length=200,
+        blank=True,
+        help_text="static/img/urun-katalog/ altındaki hazır görsellerden seçin.",
+    )
     is_active = models.BooleanField("Satışta", default=True)
     created_at = models.DateTimeField("Oluşturulma", auto_now_add=True)
 
@@ -81,6 +92,21 @@ class Product(models.Model):
     @property
     def in_stock(self) -> bool:
         return int(self.stock_quantity) > 0
+
+    @property
+    def has_display_image(self) -> bool:
+        return bool(self.image) or bool(self.gallery_image)
+
+    @property
+    def display_image_url(self) -> str:
+        if self.image:
+            return self.image.url
+        if self.gallery_image:
+            base = settings.STATIC_URL
+            if not base.endswith("/"):
+                base += "/"
+            return f"{base}{self.gallery_image}"
+        return ""
 
 
 class StockNotification(models.Model):

@@ -16,11 +16,7 @@
     <div class="detail-gallery">
       <div class="detail-image detail-image--elevated">
         <a class="detail-image-link" href="#siparis" title="Sipariş bölümüne git">
-          {% if product.image %}
-            <img src="{{ product.image.url }}" alt="{{ product.name }}">
-          {% else %}
-            <div class="placeholder-thumb" style="min-height:280px;">Görsel yok</div>
-          {% endif %}
+          {% include "catalog/_product_thumb.html" with product=product placeholder_style="min-height:280px;" %}
         </a>
       </div>
     </div>
@@ -92,11 +88,7 @@
             <span class="card-badge">{{ p.category.name }}</span>
             {% include "catalog/_favorite_button.html" with product=p %}
             <a class="card-image-link" href="{{ p.get_absolute_url }}" aria-label="{{ p.name }} — ürün detayı">
-              {% if p.image %}
-                <img src="{{ p.image.url }}" alt="">
-              {% else %}
-                <div class="placeholder-thumb">Görsel yok</div>
-              {% endif %}
+              {% include "catalog/_product_thumb.html" with product=p alt="" %}
             </a>
           </div>
           <div class="card-body">

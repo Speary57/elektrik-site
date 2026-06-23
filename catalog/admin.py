@@ -1,6 +1,9 @@
+from django import forms
 from django.contrib import admin
 from django.shortcuts import redirect
+from django.templatetags.static import static
 from django.urls import reverse
+from django.utils.html import format_html
 
 from .models import (
     Category,
@@ -9,6 +12,25 @@ from .models import (
     SiteSettings,
     StockNotification,
 )
+from .product_images import gallery_image_choices
+
+
+class ProductAdminForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["gallery_image"] = forms.ChoiceField(
+            choices=gallery_image_choices(),
+            required=False,
+            label="Katalog fotoğrafı",
+            help_text=(
+                "Hazır galeriden seçin. Yeni görsel eklemek için "
+                "static/img/urun-katalog/ klasörüne dosya koyup sayfayı yenileyin."
+            ),
+        )
 
 
 @admin.register(Category)
@@ -19,12 +41,13 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    form = ProductAdminForm
     list_display = ("name", "category", "price", "stock_quantity", "is_active", "created_at")
     list_editable = ("stock_quantity",)
     list_filter = ("category", "is_active")
     search_fields = ("name", "description")
     prepopulated_fields = {"slug": ("name",)}
-    readonly_fields = ("created_at",)
+    readonly_fields = ("created_at", "gallery_preview")
     fieldsets = (
         (
             None,
@@ -36,6 +59,8 @@ class ProductAdmin(admin.ModelAdmin):
                     "description",
                     "price",
                     "stock_quantity",
+                    "gallery_image",
+                    "gallery_preview",
                     "image",
                     "is_active",
                 ),
@@ -43,6 +68,16 @@ class ProductAdmin(admin.ModelAdmin):
         ),
         ("Sistem", {"fields": ("created_at",), "classes": ("collapse",)}),
     )
+
+    @admin.display(description="Galeri önizleme")
+    def gallery_preview(self, obj):
+        if not obj or not obj.gallery_image:
+            return "—"
+        url = static(obj.gallery_image)
+        return format_html(
+            '<img src="{}" alt="" style="max-height:140px;border-radius:8px;border:1px solid #ddd;">',
+            url,
+        )
 
 
 @admin.register(StockNotification)
