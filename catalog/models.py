@@ -102,10 +102,9 @@ class Product(models.Model):
         if self.image:
             return self.image.url
         if self.gallery_image:
-            base = settings.STATIC_URL
-            if not base.endswith("/"):
-                base += "/"
-            return f"{base}{self.gallery_image}"
+            from django.templatetags.static import static
+
+            return static(self.gallery_image)
         return ""
 
 
