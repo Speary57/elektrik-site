@@ -1,0 +1,67 @@
+<Window x:Class="StokYonetim.Views.SalaryScheduleWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Aylık Maaş Günü" Height="520" Width="480" MinHeight="480" MinWidth="440"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource BgBrush}" WindowStyle="SingleBorderWindow">
+    <Grid Margin="16">
+        <Border Background="White" CornerRadius="12" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1" Padding="24,24,24,20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Aylık maaş günü" FontSize="20" FontWeight="Bold"
+                           Foreground="{StaticResource TextBrush}" Margin="0,0,0,6"/>
+                <TextBlock Grid.Row="1"
+                           Text="Personel maaşlarının her ay hangi gün ödeneceğini belirleyin."
+                           Foreground="{StaticResource MutedBrush}" FontSize="13" Margin="0,0,0,20"
+                           TextWrapping="Wrap"/>
+
+                <StackPanel Grid.Row="2" Margin="0,0,0,14">
+                    <TextBlock Text="Ayın kaçıncı günü?" Style="{StaticResource FormLabel}"/>
+                    <ComboBox x:Name="PaymentDayCombo" Style="{StaticResource AppComboBox}"
+                              SelectionChanged="PaymentDayCombo_SelectionChanged"/>
+                </StackPanel>
+
+                <Border Grid.Row="3" Background="#F8FAFC" BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock x:Name="ScheduleInfoText" FontSize="13" Foreground="{StaticResource TextBrush}"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock x:Name="TodayHintText" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{StaticResource PrimaryBrush}" Margin="0,10,0,0"
+                                   TextWrapping="Wrap" Visibility="Collapsed"/>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Row="4">
+                    <TextBlock Text="Toplu ödeme" Style="{StaticResource FormLabel}"/>
+                    <TextBlock Text="Aktif personellerin bu ay maaşı henüz ödenmediyse toplu olarak kaydedilir."
+                               FontSize="12" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,10"
+                               TextWrapping="Wrap"/>
+                    <Button x:Name="PayMonthBtn" Content="Bu ay maaşları öde" Style="{StaticResource SecondaryButton}"
+                            Height="42" Click="PayMonth_Click"/>
+                </StackPanel>
+
+                <Grid Grid.Row="6" Margin="0,20,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Content="İptal" Style="{StaticResource SecondaryButton}" Height="44" Click="Cancel_Click"/>
+                    <Button Grid.Column="2" Content="Kaydet" Style="{StaticResource PrimaryButton}" Height="44"
+                            Click="Save_Click"/>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

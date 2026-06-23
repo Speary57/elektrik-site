@@ -8,8 +8,10 @@ staticfiles/
 venv/
 .env
 
-# Masaüstü uygulama (GitHub'a gönderilmez)
-stok-app/
+# Masaüstü uygulama derleme çıktıları
+stok-app/App/
+stok-app/StokYonetim/bin/
+stok-app/StokYonetim/obj/
 *.exe
 *.dll
 *.pdb

@@ -1,0 +1,147 @@
+<UserControl x:Class="StokYonetim.Views.Pages.OrderAddPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Sipariş Ekle" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="Siteden gelen sipariş bilgilerini girin ve kaydedin. Kayıtlar Siparişler bölümünde listelenir."
+                       Style="{StaticResource PageSubtitle}"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Border Style="{StaticResource SectionCard}" Padding="24" HorizontalAlignment="Stretch">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Yeni sipariş" FontSize="15" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextBrush}" Margin="0,0,0,20"/>
+
+                    <Grid Grid.Row="1" Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Müşteri adı" Style="{StaticResource FormLabel}"/>
+                            <TextBox x:Name="CustomerNameBox" Style="{StaticResource InputBox}" MaxLength="120"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Müşteri telefon" Style="{StaticResource FormLabel}"/>
+                            <TextBox x:Name="CustomerPhoneBox" Style="{StaticResource InputBox}"
+                                     ToolTip="0XXX XXX XX XX"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Grid.Row="2" Margin="0,0,0,20">
+                        <TextBlock Text="Not" Style="{StaticResource FormLabel}"/>
+                        <TextBox x:Name="NotesBox" Style="{StaticResource InputBox}" MaxLength="500"
+                                 MinHeight="72" TextWrapping="Wrap" AcceptsReturn="True"
+                                 VerticalScrollBarVisibility="Auto"/>
+                    </StackPanel>
+
+                    <Border Grid.Row="3" Background="#F8FAFC" BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1" CornerRadius="10" Padding="20" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Ürün ekle" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextBrush}" Margin="0,0,0,14"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="160"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Ürün" Style="{StaticResource FormLabel}"/>
+                                    <ComboBox x:Name="ProductCombo" Style="{StaticResource AppComboBox}"
+                                              DisplayMemberPath="DisplayName" SelectionChanged="ProductCombo_SelectionChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Miktar" Style="{StaticResource FormLabel}"/>
+                                    <TextBox x:Name="QuantityBox" Style="{StaticResource InputBox}" MaxLength="6" Text="1"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="4">
+                                    <TextBlock Text="Birim fiyat (₺)" Style="{StaticResource FormLabel}"/>
+                                    <TextBox x:Name="UnitPriceBox" Style="{StaticResource InputBox}" MaxLength="14"
+                                             IsReadOnly="True" Background="#F1F5F9" Foreground="{StaticResource TextBrush}"/>
+                                </StackPanel>
+                                <Button Grid.Column="6" Content="Ürün ekle" Style="{StaticResource SecondaryButton}"
+                                        Height="42" MinWidth="130" VerticalAlignment="Bottom" Click="AddLine_Click"/>
+                            </Grid>
+
+                            <Border Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                    CornerRadius="8" Padding="8" Margin="0,16,0,0" MinHeight="160">
+                                <Grid>
+                                    <ListView x:Name="DraftLinesList" BorderThickness="0" Background="Transparent"
+                                              MinHeight="140">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="8,10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Display}" FontSize="14"
+                                                               Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                                    <Button Grid.Column="1" Content="Kaldır" Style="{StaticResource DangerButton}"
+                                                            Padding="12,8" Tag="{Binding ProductId}" Click="RemoveLine_Click"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                    <TextBlock x:Name="DraftEmptyText" Text="Henüz ürün eklenmedi. Yukarıdan ürün seçip listeye ekleyin."
+                                               Foreground="{StaticResource MutedBrush}" FontSize="14"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap"
+                                               TextAlignment="Center" Margin="24"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid Grid.Row="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="Siparişi kaydet" Style="{StaticResource PrimaryButton}"
+                                    Height="44" MinWidth="150" Click="Save_Click"/>
+                            <Button Content="Temizle" Style="{StaticResource SecondaryButton}" Height="44" MinWidth="110"
+                                    Margin="12,0,0,0" Click="Clear_Click"/>
+                        </StackPanel>
+
+                        <Border Grid.Column="1" Background="{StaticResource AccentSoftBrush}" BorderBrush="#BFDBFE"
+                                BorderThickness="1" CornerRadius="10" Padding="20,14" MinWidth="260">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="Sipariş toplamı:" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"
+                                           Margin="0,0,16,0"/>
+                                <TextBlock x:Name="DraftTotalText" FontSize="22" FontWeight="Bold"
+                                           Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

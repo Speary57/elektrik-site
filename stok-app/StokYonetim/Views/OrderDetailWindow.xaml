@@ -1,0 +1,109 @@
+<Window x:Class="StokYonetim.Views.OrderDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Sipariş Detayı" Height="560" Width="620" MinHeight="480" MinWidth="520"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
+        Background="{StaticResource BgBrush}" WindowStyle="SingleBorderWindow">
+    <Grid Margin="20">
+        <Border Background="White" CornerRadius="12" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1" Padding="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Background="{StaticResource PrimaryBrush}" CornerRadius="12,12,0,0" Padding="24,20">
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Text="Sipariş Detayı" FontSize="13" Foreground="#BFDBFE" Margin="0,0,0,4"/>
+                            <TextBlock x:Name="CustomerTitle" FontSize="22" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock x:Name="OrderMetaText" FontSize="13" Foreground="#E0E7FF" Margin="0,6,0,0"/>
+                        </StackPanel>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Top"
+                                Background="#FFFFFF22" CornerRadius="8" Padding="12,6">
+                            <TextBlock x:Name="OrderDateText" FontSize="12" Foreground="White" FontWeight="SemiBold"/>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="1" Background="#F8FAFC" Padding="20,14" BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="0,0,0,1">
+                    <StackPanel>
+                        <TextBlock Text="Not" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,4"/>
+                        <TextBlock x:Name="NotesText" FontSize="13" Foreground="{StaticResource TextBrush}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Padding="16,12">
+                    <StackPanel>
+                        <Border Background="#F8FAFC" CornerRadius="8" Padding="12,10" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="70"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="100"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Ürün" Style="{StaticResource TableHeaderText}"/>
+                                <TextBlock Grid.Column="1" Text="Adet" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="Birim fiyat" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="3" Text="Tutar" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </Border>
+
+                        <ItemsControl x:Name="LinesList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="12,12">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="70"/>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition Width="100"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding ProductName}" FontSize="14" FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextBrush}"/>
+                                                <TextBlock Text="{Binding CategoryName}" FontSize="12"
+                                                           Foreground="{StaticResource MutedBrush}" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding Quantity}" FontSize="14" FontWeight="SemiBold"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                       Foreground="{StaticResource TextBrush}"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding UnitPriceDisplay}" FontSize="13"
+                                                       HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                       Foreground="{StaticResource MutedBrush}"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding LineTotalDisplay}" FontSize="14" FontWeight="SemiBold"
+                                                       HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                       Foreground="{StaticResource PrimaryBrush}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Border Grid.Row="3" Background="{StaticResource AccentSoftBrush}" BorderBrush="#BFDBFE"
+                        BorderThickness="0,1,0,0" Padding="20,16">
+                    <Grid>
+                        <TextBlock Text="Genel toplam" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="GrandTotalText" FontSize="24" FontWeight="Bold"
+                                   Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Right"/>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="4" Padding="16,12">
+                    <Button Content="Kapat" Style="{StaticResource PrimaryButton}" Height="44"
+                            HorizontalAlignment="Stretch" Click="Close_Click"/>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

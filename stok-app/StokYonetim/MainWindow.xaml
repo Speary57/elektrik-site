@@ -1,0 +1,54 @@
+﻿<Window x:Class="StokYonetim.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Kılağuz Elektrik" Height="720" Width="1100" MinHeight="600" MinWidth="900"
+        WindowStartupLocation="CenterScreen" Background="{StaticResource BgBrush}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="{StaticResource SidebarBrush}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="20,24,20,28">
+                    <Border Background="White" CornerRadius="10" Padding="8" Width="52" Height="52" Margin="0,0,0,14">
+                        <Image Source="/Assets/kilaguz-logo.png" Stretch="Uniform"/>
+                    </Border>
+                    <TextBlock Text="Kılağuz" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Elektrik" FontSize="20" FontWeight="Bold" Foreground="#93C5FD" Margin="0,-4,0,0"/>
+                    <TextBlock Text="Stok ve ürün yönetimi" Foreground="#94A3B8" FontSize="11"
+                               Margin="0,10,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Top" Margin="12,0">
+                    <Button x:Name="NavFinance" Content="💰  Gelir / Gider" Style="{StaticResource NavButton}"
+                            Click="Nav_Click" Tag="finance"/>
+                    <Button x:Name="NavCategories" Content="📁  Kategoriler" Style="{StaticResource NavButtonActive}"
+                            Click="Nav_Click" Tag="categories" Margin="0,4,0,0"/>
+                    <Button x:Name="NavProducts" Content="📦  Ürünler" Style="{StaticResource NavButton}"
+                            Click="Nav_Click" Tag="products" Margin="0,4,0,0"/>
+                    <Button x:Name="NavStock" Content="📊  Stok Takibi" Style="{StaticResource NavButton}"
+                            Click="Nav_Click" Tag="stock" Margin="0,4,0,0"/>
+                    <Button x:Name="NavPersonnel" Content="👤  Personeller" Style="{StaticResource NavButton}"
+                            Click="Nav_Click" Tag="personnel" Margin="0,4,0,0"/>
+                    <Button x:Name="NavUsers" Content="🔐  Kullanıcılar" Style="{StaticResource NavButton}"
+                            Click="Nav_Click" Tag="users" Margin="0,4,0,0"/>
+                    <Button x:Name="NavOrderAdd" Content="➕  Sipariş Ekle" Style="{StaticResource NavButton}"
+                            Click="Nav_Click" Tag="order-add" Margin="0,4,0,0"/>
+                    <Button x:Name="NavOrders" Content="🛒  Siparişler" Style="{StaticResource NavButton}"
+                            Click="Nav_Click" Tag="orders" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Bottom" Margin="12,0,12,16">
+                    <Button Content="Çıkış yap" Style="{StaticResource NavButton}" Click="Logout_Click"
+                            Foreground="#FCA5A5"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Border Grid.Column="1" Padding="32,28" Background="{StaticResource BgBrush}">
+            <ContentControl x:Name="PageHost"/>
+        </Border>
+    </Grid>
+</Window>
