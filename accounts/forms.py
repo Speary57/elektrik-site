@@ -1,53 +1,13 @@
 import datetime
-import threading
 
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import (
-    AuthenticationForm,
-    PasswordResetForm,
-    SetPasswordForm,
-)
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.password_validation import validate_password
 
 from .models import Profile
 
 User = get_user_model()
-
-
-class AsyncPasswordResetForm(PasswordResetForm):
-    """Parola sıfırlama e-postasını arka planda gönderir.
-
-    Böylece 'Sıfırlama bağlantısı gönder' tıklanınca onay sayfası SMTP'yi
-    beklemeden anında açılır; e-posta birkaç saniye içinde ulaşır.
-    """
-
-    def send_mail(self, *args, **kwargs):
-        thread = threading.Thread(
-            target=super().send_mail, args=args, kwargs=kwargs, daemon=True
-        )
-        thread.start()
-
-
-class StyledSetPasswordForm(SetPasswordForm):
-    """Yeni parola alanlarına site giriş kutularıyla aynı görünümü verir."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["new_password1"].widget.attrs.update(
-            {
-                "class": "auth-control",
-                "autocomplete": "new-password",
-                "placeholder": "Yeni parolanız",
-            }
-        )
-        self.fields["new_password2"].widget.attrs.update(
-            {
-                "class": "auth-control",
-                "autocomplete": "new-password",
-                "placeholder": "Yeni parolanız (tekrar)",
-            }
-        )
 
 
 class RegisterForm(forms.Form):
