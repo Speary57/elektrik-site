@@ -1,12 +1,6 @@
-import os
-import secrets
-import time
-
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import check_password, make_password
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -17,7 +11,6 @@ from cart.models import Order
 from cart import emails as order_emails
 
 from .forms import AccountInfoForm, RegisterForm
-from .middleware import SESSION_VERIFIED_AT, SESSION_VERIFIED_UID
 from .models import Favorite, Profile
 
 
@@ -94,174 +87,6 @@ def order_cancel(request, order_number):
 
     getattr(messages, level)(request, msg)
     return redirect("accounts:order_detail", order_number=order.order_number)
-
-
-# ----- Yönetim paneli e-posta doğrulaması (2FA) -----
-
-_OTP_HASH = "admin_otp_hash"
-_OTP_EXPIRES = "admin_otp_expires"
-_OTP_ATTEMPTS = "admin_otp_attempts"
-_OTP_UID = "admin_otp_uid"
-_OTP_EMAIL = "admin_otp_email"
-# Bu doğrulama için en az bir kod gönderildi mi? (Otomatik tekrar göndermeyi engeller.)
-_OTP_SENT = "admin_otp_sent"
-
-
-def _safe_admin_next(value):
-    prefix = getattr(settings, "ADMIN_URL_PREFIX", "/yonetim/")
-    if value and value.startswith(prefix) and "//" not in value[1:]:
-        return value
-    return prefix
-
-
-def _mask_email(email):
-    if not email or "@" not in email:
-        return email or ""
-    local, domain = email.split("@", 1)
-    if len(local) <= 2:
-        masked = local[0] + "*"
-    else:
-        masked = local[:2] + "*" * (len(local) - 2)
-    return f"{masked}@{domain}"
-
-
-def _prepare_admin_code(request, user):
-    """Doğrulama kodunu üretir ve oturuma kaydeder."""
-    code = f"{secrets.randbelow(1000000):06d}"
-    ttl = getattr(settings, "ADMIN_OTP_CODE_TTL", 600)
-    request.session[_OTP_HASH] = make_password(code)
-    request.session[_OTP_EXPIRES] = time.time() + ttl
-    request.session[_OTP_ATTEMPTS] = 0
-    request.session[_OTP_UID] = user.pk
-    request.session[_OTP_EMAIL] = user.email
-    request.session[_OTP_SENT] = True
-    request.session.modified = True
-    return code
-
-
-def _send_admin_code(request, user):
-    """Kodu hazırlar; e-postayı gönderir."""
-    code = _prepare_admin_code(request, user)
-    return order_emails.send_admin_verification_code(user, code)
-
-
-def _admin_verify_context(request, user, next_url):
-    on_render = bool(
-        os.environ.get("RENDER") or os.environ.get("RENDER_EXTERNAL_HOSTNAME")
-    )
-    uses_resend = bool(getattr(settings, "RESEND_API_KEY", ""))
-    email_configured = uses_resend or (
-        settings.EMAIL_HOST_USER
-        and settings.EMAIL_HOST_PASSWORD
-        and settings.EMAIL_BACKEND != "django.core.mail.backends.console.EmailBackend"
-    )
-    smtp_blocked = on_render and not uses_resend
-    return {
-        "masked_email": _mask_email(user.email),
-        "next": next_url,
-        "email_configured": email_configured,
-        "smtp_blocked_on_render": smtp_blocked,
-    }
-
-
-def _has_valid_pending(request, user):
-    if request.session.get(_OTP_UID) != user.pk:
-        return False
-    if not request.session.get(_OTP_HASH):
-        return False
-    expires = request.session.get(_OTP_EXPIRES, 0)
-    return time.time() < float(expires)
-
-
-@login_required
-def admin_verify(request):
-    user = request.user
-    next_url = _safe_admin_next(
-        request.POST.get("next") or request.GET.get("next")
-    )
-
-    if not user.is_staff:
-        return redirect("catalog:home")
-
-    if not user.email:
-        return render(
-            request,
-            "registration/admin_verify.html",
-            {"no_email": True},
-        )
-
-    if request.method == "POST":
-        action = request.POST.get("action")
-        if action == "resend":
-            if _send_admin_code(request, user):
-                messages.success(
-                    request,
-                    "Yeni bir doğrulama kodu e-postanıza gönderildi.",
-                )
-            else:
-                messages.error(
-                    request,
-                    "Doğrulama kodu gönderilemedi. Render'da RESEND_API_KEY gerekir.",
-                )
-            return redirect(f"{request.path}?next={next_url}")
-
-        code = (request.POST.get("code") or "").strip()
-        if not _has_valid_pending(request, user):
-            messages.error(
-                request,
-                "Kodun süresi doldu. Lütfen “Yeni kod gönder” ile yeni bir kod isteyin.",
-            )
-            return render(
-                request,
-                "registration/admin_verify.html",
-                _admin_verify_context(request, user, next_url),
-            )
-
-        max_attempts = getattr(settings, "ADMIN_OTP_MAX_ATTEMPTS", 5)
-        attempts = int(request.session.get(_OTP_ATTEMPTS, 0))
-        if check_password(code, request.session.get(_OTP_HASH, "")):
-            # Başarılı: panel erişimini aç, bekleyen kodu temizle.
-            request.session[SESSION_VERIFIED_AT] = time.time()
-            request.session[SESSION_VERIFIED_UID] = user.pk
-            for key in (_OTP_HASH, _OTP_EXPIRES, _OTP_ATTEMPTS, _OTP_UID, _OTP_EMAIL, _OTP_SENT):
-                request.session.pop(key, None)
-            return redirect(next_url)
-
-        attempts += 1
-        request.session[_OTP_ATTEMPTS] = attempts
-        if attempts >= max_attempts:
-            for key in (_OTP_HASH, _OTP_EXPIRES, _OTP_ATTEMPTS):
-                request.session.pop(key, None)
-            messages.error(
-                request,
-                "Çok fazla hatalı deneme. Lütfen yeni kod isteyin.",
-            )
-        else:
-            messages.error(
-                request,
-                f"Kod hatalı. Kalan deneme: {max_attempts - attempts}.",
-            )
-        return render(
-            request,
-            "registration/admin_verify.html",
-            _admin_verify_context(request, user, next_url),
-        )
-
-    # GET: yalnızca bu doğrulama için hiç kod gönderilmediyse ilk kodu gönder.
-    # Süre dolduğunda otomatik tekrar gönderim YOK; kullanıcı "Yeni kod gönder"e basmalı.
-    if not request.session.get(_OTP_SENT):
-        if not _send_admin_code(request, user):
-            messages.error(
-                request,
-                "Doğrulama kodu gönderilemedi. Render'da Gmail SMTP çalışmaz; "
-                "RESEND_API_KEY ekleyin (resend.com).",
-            )
-
-    return render(
-        request,
-        "registration/admin_verify.html",
-        _admin_verify_context(request, user, next_url),
-    )
 
 
 @login_required

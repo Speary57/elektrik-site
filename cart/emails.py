@@ -18,29 +18,6 @@ BRAND = "Kılağuz Elektrik ve Yapı Market"
 BRAND_COLOR = "#2563eb"
 
 
-def _send_sync(subject, text_body, html_body, recipients):
-    """Kritik e-postalar (doğrulama kodu vb.) için senkron gönderim."""
-    recipients = [r for r in recipients if r]
-    if not recipients:
-        return False
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None)
-    try:
-        msg = EmailMultiAlternatives(
-            subject=subject,
-            body=text_body,
-            from_email=from_email,
-            to=recipients,
-        )
-        if html_body:
-            msg.attach_alternative(html_body, "text/html")
-        msg.send(fail_silently=False)
-        logger.info("E-posta gönderildi -> %s | %s", recipients, subject)
-        return True
-    except Exception:
-        logger.exception("E-posta gönderilemedi -> %s | %s", recipients, subject)
-        return False
-
-
 def _send_async(subject, text_body, html_body, recipients,
                 attachments=None, attachment_factory=None):
     """E-postayı arka planda gönderir.
@@ -366,48 +343,6 @@ def send_customer_confirmation(order):
         attachment_factory=_invoice_attachment,
     )
 
-
-def send_admin_verification_code(user, code):
-    """Yönetim paneline girişte personel kullanıcıya e-posta doğrulama kodu."""
-    email = getattr(user, "email", "")
-    if not email:
-        return False
-    name = (user.get_full_name() or user.get_username() or "").strip()
-    greeting = f"Merhaba {name}," if name else "Merhaba,"
-    subject = f"Yönetim paneli doğrulama kodu: {code}"
-
-    text_body = (
-        f"{greeting}\n\n"
-        "Yönetim paneline giriş için doğrulama kodunuz:\n\n"
-        f"    {code}\n\n"
-        "Bu kod 10 dakika boyunca geçerlidir. Bu isteği siz yapmadıysanız "
-        "hesabınızın parolasını değiştirin.\n\n"
-        f"{BRAND}"
-    )
-
-    inner = (
-        '<p style="margin:0 0 10px;font-size:14px;font-weight:bold;color:#475569;">'
-        "Yönetim paneline giriş doğrulama kodunuz:</p>"
-        f'<div style="margin:0 0 18px;text-align:center;">'
-        f'<span style="display:inline-block;font-size:30px;font-weight:bold;'
-        f"letter-spacing:8px;color:{BRAND_COLOR};background:#eff6ff;"
-        f'border:1px solid #bfdbfe;border-radius:12px;padding:14px 26px;">{code}</span>'
-        "</div>"
-        '<p style="margin:0;font-size:13px;font-weight:bold;color:#92400e;'
-        "background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;"
-        'padding:12px 14px;line-height:1.6;">'
-        "Bu kod <strong>10 dakika</strong> geçerlidir. İsteği siz yapmadıysanız "
-        "lütfen hesap parolanızı değiştirin.</p>"
-    )
-    html_body = _html_shell(
-        "Yönetim paneli doğrulama",
-        f"{greeting} yönetim paneline güvenli giriş için doğrulama kodunuzu aşağıda bulabilirsiniz.",
-        inner,
-    )
-    if getattr(settings, "RESEND_API_KEY", ""):
-        return _send_sync(subject, text_body, html_body, [email])
-    _send_async(subject, text_body, html_body, [email])
-    return True
 
 def send_low_stock_alert(product, product_url=""):
     """Ürün stoğu eşik değerin altına düşünce işletmeye uyarı maili."""

@@ -56,7 +56,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "accounts.middleware.AdminEmailOTPMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -156,12 +155,6 @@ SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")
 
 # Stok bu değerin altına düşünce işletmeye uyarı maili gönderilir (ör. 3 = 3'ten az).
 LOW_STOCK_THRESHOLD = int(os.environ.get("LOW_STOCK_THRESHOLD", "3"))
-
-# Yönetim paneli (personel) e-posta doğrulaması
-ADMIN_URL_PREFIX = "/yonetim/"
-ADMIN_OTP_CODE_TTL = 10 * 60          # Kodun geçerlilik süresi (saniye): 10 dk
-ADMIN_OTP_SESSION_TTL = 8 * 60 * 60   # Doğrulamadan sonra panel erişimi: 8 saat
-ADMIN_OTP_MAX_ATTEMPTS = 5            # Yanlış kod deneme sınırı
 
 # Render / ters vekil (HTTPS) ayarları
 if os.environ.get("RENDER") or os.environ.get("RENDER_EXTERNAL_HOSTNAME"):

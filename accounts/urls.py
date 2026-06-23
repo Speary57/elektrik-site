@@ -63,5 +63,4 @@ urlpatterns = [
     path("favorilerim/", views.favorites, name="favorites"),
     path("favori/<int:product_id>/", views.favorite_toggle, name="favorite_toggle"),
     path("bilgilerim/", views.profile, name="profile"),
-    path("yonetim-dogrulama/", views.admin_verify, name="admin_verify"),
 ]
